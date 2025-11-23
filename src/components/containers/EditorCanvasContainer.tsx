@@ -18,6 +18,15 @@ export const EditorCanvasContainer: React.FC = () => {
     startPos: 0,
   });
 
+  // Custom Multi-Touch State
+  const touchState = useRef({
+    distance: 0,
+    angle: 0,
+    scale: 1,
+    rotation: 0,
+    isGesturing: false,
+  });
+
   const {
     baseImage,
     canvasWidth,
@@ -148,13 +157,6 @@ export const EditorCanvasContainer: React.FC = () => {
     });
 
     // --- Custom Multi-Touch Handler (Seamless Drag -> Gesture) ---
-    const touchState = useRef({
-      distance: 0,
-      angle: 0,
-      scale: 1,
-      rotation: 0,
-      isGesturing: false,
-    });
 
     const getDistance = (t1: Touch, t2: Touch) => {
       const dx = t1.clientX - t2.clientX;

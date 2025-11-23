@@ -147,49 +147,114 @@ export const EditorCanvasContainer: React.FC = () => {
       gestureState.current = { mode: null, startVal: 0, startPos: 0 };
     });
 
-    // Mobile Multi-Touch Gestures (Fabric.js native support)
-    canvas.on('touch:gesture' as any, (e: any) => {
-      const target = canvas.getActiveObject();
-      if (!target || !e.self) return;
-
-      e.e.preventDefault();
-      e.e.stopPropagation();
-
-      if (e.self.state === 'start') {
-        // Store initial values if needed, but Fabric often handles relative changes
-        // For manual handling:
-        gestureState.current.startVal = target.scaleX || 1;
-      }
-
-      if (e.self.state === 'change') {
-        // Handle Rotation
-        if (e.self.rotation) {
-          target.rotate((target.angle || 0) + e.self.rotation);
-        }
-
-        // Handle Scaling
-        if (e.self.scale) {
-          const newScale = (target.scaleX || 1) * e.self.scale;
-          target.scale(newScale);
-        }
-
-        target.setCoords();
-        canvas.requestRenderAll();
-      }
-
-      if (e.self.state === 'end') {
-        // Sync with store
-        if ((target as any).objectId) {
-          updateObject((target as any).objectId, {
-            scaleX: target.scaleX,
-            scaleY: target.scaleY,
-            rotation: target.angle,
-          });
-        }
-      }
+    // --- Custom Multi-Touch Handler (Seamless Drag -> Gesture) ---
+    const touchState = useRef({
+      distance: 0,
+      angle: 0,
+      scale: 1,
+      rotation: 0,
+      isGesturing: false,
     });
 
+    const getDistance = (t1: Touch, t2: Touch) => {
+      const dx = t1.clientX - t2.clientX;
+      const dy = t1.clientY - t2.clientY;
+      return Math.sqrt(dx * dx + dy * dy);
+    };
+
+    const getAngle = (t1: Touch, t2: Touch) => {
+      const dx = t1.clientX - t2.clientX;
+      const dy = t1.clientY - t2.clientY;
+      return Math.atan2(dy, dx) * (180 / Math.PI);
+    };
+
+    // Attach raw listeners to the upper canvas (interaction layer)
+    const setupTouchListeners = () => {
+      const upperCanvas = canvas.upperCanvasEl;
+      if (!upperCanvas) return;
+
+      const handleTouchStart = (e: TouchEvent) => {
+        if (e.touches.length === 2) {
+          // Gesture started
+          touchState.current.isGesturing = true;
+          touchState.current.distance = getDistance(e.touches[0], e.touches[1]);
+          touchState.current.angle = getAngle(e.touches[0], e.touches[1]);
+
+          const target = canvas.getActiveObject();
+          if (target) {
+            touchState.current.scale = target.scaleX || 1;
+            touchState.current.rotation = target.angle || 0;
+
+            // Lock movement during gesture to prevent jittery dragging
+            target.lockMovementX = true;
+            target.lockMovementY = true;
+          }
+        }
+      };
+
+      const handleTouchMove = (e: TouchEvent) => {
+        if (e.touches.length === 2 && touchState.current.isGesturing) {
+          e.preventDefault(); // Prevent browser zoom
+
+          const target = canvas.getActiveObject();
+          if (!target) return;
+
+          // Calculate new values
+          const newDist = getDistance(e.touches[0], e.touches[1]);
+          const newAngle = getAngle(e.touches[0], e.touches[1]);
+
+          // Apply Scale
+          const scaleRatio = newDist / touchState.current.distance;
+          const newScale = touchState.current.scale * scaleRatio;
+          target.scale(newScale);
+
+          // Apply Rotation
+          const rotationDiff = newAngle - touchState.current.angle;
+          target.rotate(touchState.current.rotation + rotationDiff);
+
+          target.setCoords();
+          canvas.requestRenderAll();
+        }
+      };
+
+      const handleTouchEnd = (e: TouchEvent) => {
+        if (e.touches.length < 2 && touchState.current.isGesturing) {
+          // Gesture ended
+          touchState.current.isGesturing = false;
+
+          const target = canvas.getActiveObject();
+          if (target) {
+            // Unlock movement
+            target.lockMovementX = false;
+            target.lockMovementY = false;
+
+            // Sync with store
+            if ((target as any).objectId) {
+              updateObject((target as any).objectId, {
+                scaleX: target.scaleX,
+                scaleY: target.scaleY,
+                rotation: target.angle,
+              });
+            }
+          }
+        }
+      };
+
+      upperCanvas.addEventListener('touchstart', handleTouchStart, { passive: false });
+      upperCanvas.addEventListener('touchmove', handleTouchMove, { passive: false });
+      upperCanvas.addEventListener('touchend', handleTouchEnd);
+
+      return () => {
+        upperCanvas.removeEventListener('touchstart', handleTouchStart);
+        upperCanvas.removeEventListener('touchmove', handleTouchMove);
+        upperCanvas.removeEventListener('touchend', handleTouchEnd);
+      };
+    };
+
+    const cleanupTouch = setupTouchListeners();
+
     return () => {
+      if (cleanupTouch) cleanupTouch();
       canvas.dispose();
       fabricCanvasRef.current = null;
     };

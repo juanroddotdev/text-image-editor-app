@@ -299,41 +299,77 @@ export const EditorCanvasContainer: React.FC = () => {
     if (!fabricCanvasRef.current) return;
 
     const canvas = fabricCanvasRef.current;
+    const fabricObjects = canvas.getObjects();
 
-    // Clear existing objects
-    canvas.getObjects().forEach((obj) => {
-      canvas.remove(obj);
-    });
-
-    // Add objects from store
-    objects.forEach((obj) => {
-      if (obj.type === 'text') {
-        const text = new IText(obj.content || '', {
-          left: obj.x,
-          top: obj.y,
-          fontFamily: obj.fontFamily,
-          fontSize: obj.fontSize,
-          fill: obj.fill,
-          fontWeight: obj.fontWeight,
-          textAlign: obj.textAlign,
-          scaleX: obj.scaleX,
-          scaleY: obj.scaleY,
-          angle: obj.rotation,
-        });
-
-        // Store reference to object ID
-        (text as any).objectId = obj.id;
-
-        // Handle text editing
-        text.on('changed', () => {
-          updateObject(obj.id, { content: text.text });
-        });
-
-        canvas.add(text);
+    // 1. Handle Deletions: Remove objects that are no longer in the store
+    const storeIds = new Set(objects.map(o => o.id));
+    fabricObjects.forEach((obj) => {
+      if ((obj as any).objectId && !storeIds.has((obj as any).objectId)) {
+        canvas.remove(obj);
       }
     });
 
-    canvas.renderAll();
+    // 2. Handle Updates & Creations
+    objects.forEach((storeObj) => {
+      let existingObj = fabricObjects.find(o => (o as any).objectId === storeObj.id) as IText;
+
+      if (existingObj) {
+        // Update existing object
+        // prevent updating content if currently editing to avoid cursor jumps
+        if (!existingObj.isEditing) {
+          if (existingObj.text !== storeObj.content) existingObj.set('text', storeObj.content);
+        }
+
+        // Update other properties if changed
+        if (existingObj.left !== storeObj.x) existingObj.set('left', storeObj.x);
+        if (existingObj.top !== storeObj.y) existingObj.set('top', storeObj.y);
+        if (existingObj.scaleX !== storeObj.scaleX) existingObj.set('scaleX', storeObj.scaleX);
+        if (existingObj.scaleY !== storeObj.scaleY) existingObj.set('scaleY', storeObj.scaleY);
+        if (existingObj.angle !== storeObj.rotation) existingObj.set('angle', storeObj.rotation);
+
+        // Style updates
+        if (existingObj.fontFamily !== storeObj.fontFamily) existingObj.set('fontFamily', storeObj.fontFamily);
+        if (existingObj.fontSize !== storeObj.fontSize) existingObj.set('fontSize', storeObj.fontSize);
+        if (existingObj.fill !== storeObj.fill) existingObj.set('fill', storeObj.fill);
+        if (existingObj.fontWeight !== storeObj.fontWeight) existingObj.set('fontWeight', storeObj.fontWeight);
+        if (existingObj.textAlign !== storeObj.textAlign) existingObj.set('textAlign', storeObj.textAlign);
+
+        existingObj.setCoords();
+      } else {
+        // Create new object
+        if (storeObj.type === 'text') {
+          const text = new IText(storeObj.content || '', {
+            left: storeObj.x,
+            top: storeObj.y,
+            fontFamily: storeObj.fontFamily,
+            fontSize: storeObj.fontSize,
+            fill: storeObj.fill,
+            fontWeight: storeObj.fontWeight,
+            textAlign: storeObj.textAlign,
+            scaleX: storeObj.scaleX,
+            scaleY: storeObj.scaleY,
+            angle: storeObj.rotation,
+          });
+
+          // Store reference to object ID
+          (text as any).objectId = storeObj.id;
+
+          // Handle text editing
+          text.on('changed', () => {
+            updateObject(storeObj.id, { content: text.text });
+          });
+
+          // Auto-select all text on edit (Mobile UX)
+          text.on('editing:entered', () => {
+            text.selectAll();
+          });
+
+          canvas.add(text);
+        }
+      }
+    });
+
+    canvas.requestRenderAll();
   }, [objects]);
 
   return (

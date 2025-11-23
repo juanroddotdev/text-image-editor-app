@@ -147,6 +147,48 @@ export const EditorCanvasContainer: React.FC = () => {
       gestureState.current = { mode: null, startVal: 0, startPos: 0 };
     });
 
+    // Mobile Multi-Touch Gestures (Fabric.js native support)
+    canvas.on('touch:gesture' as any, (e: any) => {
+      const target = canvas.getActiveObject();
+      if (!target || !e.self) return;
+
+      e.e.preventDefault();
+      e.e.stopPropagation();
+
+      if (e.self.state === 'start') {
+        // Store initial values if needed, but Fabric often handles relative changes
+        // For manual handling:
+        gestureState.current.startVal = target.scaleX || 1;
+      }
+
+      if (e.self.state === 'change') {
+        // Handle Rotation
+        if (e.self.rotation) {
+          target.rotate((target.angle || 0) + e.self.rotation);
+        }
+
+        // Handle Scaling
+        if (e.self.scale) {
+          const newScale = (target.scaleX || 1) * e.self.scale;
+          target.scale(newScale);
+        }
+
+        target.setCoords();
+        canvas.requestRenderAll();
+      }
+
+      if (e.self.state === 'end') {
+        // Sync with store
+        if ((target as any).objectId) {
+          updateObject((target as any).objectId, {
+            scaleX: target.scaleX,
+            scaleY: target.scaleY,
+            rotation: target.angle,
+          });
+        }
+      }
+    });
+
     return () => {
       canvas.dispose();
       fabricCanvasRef.current = null;
@@ -228,7 +270,7 @@ export const EditorCanvasContainer: React.FC = () => {
   }, [objects]);
 
   return (
-    <div className="w-full h-full flex items-center justify-center bg-neutral-200 overflow-hidden">
+    <div className="w-full h-full flex items-center justify-center bg-neutral-200 overflow-hidden" style={{ touchAction: 'none' }}>
       <div className="shadow-2xl">
         <canvas ref={canvasRef} />
       </div>

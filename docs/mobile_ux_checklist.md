@@ -22,17 +22,17 @@ This checklist details the essential expected behaviors for the text box object 
 
 ## II. Editing and Focus Management
 
-- [ ] **4. Edit Content**
+- [x] **4. Edit Content**
     - **Task**: Double-tap anywhere inside the focused text area.
     - **Expected Behavior**: Immediately open the native soft keyboard for inline editing.
     - **Rationale**: Industry-standard mobile pattern for accessing text input.
 
-- [ ] **5. Selection Handles**
+- [x] **5. Selection Handles**
     - **Task**: Single-tap on the text area.
     - **Expected Behavior**: The text box should be surrounded by a visual indicator (bounding box) and control handles.
     - **Rationale**: Confirms object is active and allows for precise adjustments.
 
-- [ ] **6. Deselect (Commit)**
+- [x] **6. Deselect (Commit)**
     - **Task**: Single-tap anywhere outside the currently selected text object.
     - **Expected Behavior**: Commit input and dismiss the keyboard/controls.
     - **Rationale**: Standard mobile pattern.

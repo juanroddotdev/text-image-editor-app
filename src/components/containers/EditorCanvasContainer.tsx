@@ -6,6 +6,7 @@
 import React, { useEffect, useRef } from 'react';
 import { Canvas, FabricImage, IText } from 'fabric';
 import { useEditorStore } from '../../state/editorStore';
+import { applySelectionStyle } from '../../config/canvasConfig';
 
 export const EditorCanvasContainer: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -47,6 +48,9 @@ export const EditorCanvasContainer: React.FC = () => {
     });
 
     fabricCanvasRef.current = canvas;
+
+    // Apply custom selection style
+    applySelectionStyle(canvas);
 
     // Handle object selection
     canvas.on('selection:created', (e) => {
@@ -368,6 +372,9 @@ export const EditorCanvasContainer: React.FC = () => {
         }
       }
     });
+
+    // Apply selection style after all objects are added
+    applySelectionStyle(canvas);
 
     canvas.requestRenderAll();
   }, [objects]);

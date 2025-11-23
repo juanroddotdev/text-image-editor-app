@@ -116,3 +116,18 @@ Use this checklist to systematically verify the text editing capabilities of the
     - [ ] Drag Right: Object should rotate clockwise.
     - [ ] Rotation should follow cursor movement.
 
+## 10. Mobile Testing Setup
+*Use this method to test on a physical phone with developer tools.*
+
+### Local Network Access
+1.  **Start Server**: Run `npm run dev` (it now includes `--host`).
+2.  **Find URL**: Look for `Network: http://192.168.x.x:5173` in the terminal output.
+3.  **Connect**: Type that exact URL into your phone's browser (Chrome/Safari).
+4.  **Requirement**: Phone and computer must be on the same Wi-Fi.
+
+### Remote Debugging (Android/Chrome)
+1.  Connect phone to computer via USB.
+2.  Enable **USB Debugging** in Android Developer Options.
+3.  On computer, open Chrome and go to `chrome://inspect/#devices`.
+4.  You will see your phone's open tabs. Click **"Inspect"** to open a full DevTools window for your phone.
+

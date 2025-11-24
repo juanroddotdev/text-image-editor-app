@@ -12,7 +12,7 @@ function App() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isPanelCollapsed, setIsPanelCollapsed] = useState(false);
   const [touchStartX, setTouchStartX] = useState<number | null>(null);
-  const { baseImage, setBaseImage, addTextObject, objects, activeObjectId } = useEditorStore();
+  const { baseImage, setBaseImage, addTextObject, objects, activeObjectId, isDeleteZoneActive } = useEditorStore();
 
   // Set container height to actual viewport height (fixes mobile browser issue)
   // This ensures the layout uses window.innerHeight instead of 100dvh which can be incorrect on mobile
@@ -299,12 +299,39 @@ function App() {
           </div>
         )}
 
+        {/* Delete Zone - Appears at bottom when dragging object towards bottom */}
+        {baseImage && isDeleteZoneActive && (
+          <div 
+            className="absolute bottom-0 left-0 right-0 flex items-center justify-center py-8 z-30 transition-all duration-300"
+            style={{
+              background: 'linear-gradient(to top, rgba(239, 68, 68, 0.9), rgba(239, 68, 68, 0.7))',
+              backdropFilter: 'blur(10px)',
+              WebkitBackdropFilter: 'blur(10px)',
+            }}
+          >
+            <div className="flex flex-col items-center gap-3">
+              {/* Trash Can Icon */}
+              <div className="w-16 h-16 flex items-center justify-center bg-white/20 rounded-full border-2 border-white/40">
+                <svg className="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
+              </div>
+              {/* Delete Text */}
+              <div className="text-white text-sm font-semibold">
+                Release to Delete
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Bottom Center - Add Image Button */}
         <button
           onClick={handleUploadClick}
           className="absolute bottom-6 left-1/2 transform -translate-x-1/2 w-14 h-14 flex items-center justify-center bg-white/10 backdrop-blur-md hover:bg-white/20 border border-white/20 rounded-full transition-all shadow-lg z-20"
           style={{
             opacity: baseImage ? 0.7 : 1, // Adjust opacity when image is loaded
+            // Hide when delete zone is active to avoid overlap
+            visibility: isDeleteZoneActive ? 'hidden' : 'visible',
           }}
           aria-label={baseImage ? "Change image" : "Upload image"}
         >

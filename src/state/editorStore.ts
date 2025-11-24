@@ -25,6 +25,9 @@ interface EditorState {
   objects: CanvasObject[];
   activeObjectId: string | null;
 
+  // Delete zone state
+  isDeleteZoneActive: boolean;
+
   // Actions
   setBaseImage: (image: BaseImage) => void;
   setCanvasDimensions: (width: number, height: number) => void;
@@ -32,6 +35,7 @@ interface EditorState {
   updateObject: (id: string, updates: Partial<CanvasObject>) => void;
   deleteObject: (id: string) => void;
   setActiveObject: (id: string | null) => void;
+  setDeleteZoneActive: (active: boolean) => void;
   clearCanvas: () => void;
 }
 
@@ -42,6 +46,7 @@ export const useEditorStore = create<EditorState>((set, get) => ({
   canvasHeight: 600,
   objects: [],
   activeObjectId: null,
+  isDeleteZoneActive: false,
 
   // Actions
   setBaseImage: (image) => {
@@ -109,6 +114,10 @@ export const useEditorStore = create<EditorState>((set, get) => ({
     set({ activeObjectId: id });
   },
 
+  setDeleteZoneActive: (active) => {
+    set({ isDeleteZoneActive: active });
+  },
+
   clearCanvas: () => {
     set({
       baseImage: null,
@@ -116,6 +125,7 @@ export const useEditorStore = create<EditorState>((set, get) => ({
       activeObjectId: null,
       canvasWidth: 800,
       canvasHeight: 600,
+      isDeleteZoneActive: false,
     });
   },
 }));

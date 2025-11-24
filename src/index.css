@@ -45,10 +45,30 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+:root {
+  /* CSS variable for viewport height - set by JavaScript to actual window.innerHeight */
+  --vh: 100vh;
+}
+
+html {
+  height: 100%;
+  overflow: hidden; /* Prevent html scrolling */
+}
+
 body {
   margin: 0;
-  min-height: 100vh;
+  height: 100vh;
+  height: var(--vh, 100vh); /* Use CSS variable, fallback to 100vh */
   background: #1a1f2e;
+  overflow: hidden; /* Prevent scrolling on mobile */
+  position: relative; /* Allow positioning context */
+  width: 100%;
+}
+
+#root {
+  height: 100vh;
+  height: var(--vh, 100vh); /* Use CSS variable, fallback to 100vh */
+  overflow: hidden;
 }
 
 * {

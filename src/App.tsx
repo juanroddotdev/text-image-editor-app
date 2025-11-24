@@ -2,7 +2,7 @@
  * Main Application Component
  */
 
-import React, { useRef } from 'react';
+import React, { useRef, useEffect } from 'react';
 import { useEditorStore } from './state/editorStore';
 import { EditorCanvasContainer, getCanvasDataURL } from './components/containers/EditorCanvasContainer';
 import { loadImageAsset, isValidImageFile } from './data-access/imageLoader';
@@ -11,6 +11,37 @@ import { exportImageWeb, generateExportFilename } from './data-access/imageExpor
 function App() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { baseImage, setBaseImage, addTextObject, objects, activeObjectId, updateObject, deleteObject } = useEditorStore();
+
+  // Set container height to actual viewport height (fixes mobile browser issue)
+  // This ensures the layout uses window.innerHeight instead of 100dvh which can be incorrect on mobile
+  useEffect(() => {
+    const setViewportHeight = () => {
+      const vh = window.innerHeight;
+      // Set CSS custom property with actual viewport height
+      document.documentElement.style.setProperty('--vh', `${vh}px`);
+    };
+
+    setViewportHeight();
+    
+    // Update on resize and orientation change
+    const handleResize = () => {
+      setViewportHeight();
+    };
+    
+    window.addEventListener('resize', handleResize);
+    window.addEventListener('orientationchange', handleResize);
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener('resize', handleResize);
+    }
+    
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      window.removeEventListener('orientationchange', handleResize);
+      if (window.visualViewport) {
+        window.visualViewport.removeEventListener('resize', handleResize);
+      }
+    };
+  }, []);
 
 
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -58,9 +89,15 @@ function App() {
   };
 
   return (
-    <div className="min-h-screen md:p-8 md:flex md:items-start md:justify-center bg-dark-bg">
+    <div 
+      className="md:p-8 md:flex md:items-start md:justify-center bg-dark-bg overflow-hidden"
+      style={{
+        height: 'var(--vh, 100vh)', // Use CSS variable set by JS, fallback to 100vh
+      }}
+    >
       {/* Mobile screen container - full width on mobile, fixed width on desktop */}
-      <div className="w-full md:max-w-mobile md:mx-auto relative min-h-screen md:min-h-0 md:h-[844px] flex flex-col">
+      <div className="w-full h-full md:max-w-mobile md:mx-auto relative md:h-[844px] flex flex-col"
+      >
 
         {/* Hidden file input */}
         <input
@@ -74,12 +111,12 @@ function App() {
         {baseImage ? (
           <>
             {/* Canvas Area - Full Screen */}
-            <div className="flex-1 relative overflow-hidden">
+            <div className="flex-1 relative overflow-hidden min-h-0">
               <EditorCanvasContainer />
             </div>
 
-            {/* Bottom Toolbar Overlay */}
-            <div className="bg-dark-panel/95 backdrop-blur-sm border-t border-white/10">
+            {/* Bottom Toolbar Overlay - Fixed at bottom */}
+            <div className="bg-dark-panel/95 backdrop-blur-sm border-t border-white/10 flex-shrink-0">
               {/* Text Controls Row */}
               {activeObjectId && (
                 <div className="px-4 py-3 flex items-center justify-between border-b border-white/10">

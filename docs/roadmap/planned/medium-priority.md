@@ -194,8 +194,22 @@ These are medium-priority features that enhance the application but are not crit
 
 ### 9. Grid Overlay/Guides
 - **Priority**: 🟡 Medium
-- **Status**: ❌ Not Implemented
-- **Current State**: No compositional guides available
+- **Status**: ✅ **COMPLETE** (Completed: 2025-11-23)
+- **Current State**: Grid overlay implemented with multiple grid types
+
+**Completed**:
+- ✅ Grid picker modal with 6 grid options (None, Rule of Thirds, 4x4, Center Lines, Golden Ratio, Diagonal)
+- ✅ Rule of Thirds (3x3) grid overlay
+- ✅ 4x4 grid overlay
+- ✅ Center lines (crosshair) overlay
+- ✅ Golden ratio guides overlay
+- ✅ Diagonal guides overlay
+- ✅ Grid toggle button in right-edge control panel
+- ✅ Semi-transparent grid lines with visual feedback
+
+**Reference**: See [Completed Features](../completed/features.md) for details
+
+---
 
 **Description**: 
 Professional compositional aids for optimal text and sticker placement, which is key to a high-quality editor.
@@ -246,12 +260,148 @@ Professional compositional aids for optimal text and sticker placement, which is
 
 ---
 
+### 10. Smart Alignment Guides (Snap-to-Guide)
+- **Priority**: 🟡 Medium
+- **Status**: ❌ Not Implemented
+- **Current State**: No snap-to-guide functionality exists
+
+**Description**: 
+Magnetic snap-to-guide functionality to assist users in achieving perfect composition, similar to alignment aids in professional design software (Figma, Adobe XD, Photoshop).
+
+**Expected Behavior**:
+- Objects snap to guide lines when dragged near them
+- Visual feedback shows guide lines when snapping occurs
+- Snap constraints prevent movement perpendicular to the guide line
+- Dual-axis snapping when object aligns to both horizontal and vertical guides
+
+**Implementation**:
+- **Task 1**: Define Alignment Targets (Snap Points)
+  - Canvas Center: Horizontal (Y-axis middle) and Vertical (X-axis middle)
+  - Canvas Quarters: Horizontal and vertical lines at 25%, 50%, and 75% of canvas width/height
+  - Calculate snap point coordinates based on canvas dimensions
+  - Store snap points in configuration or calculate dynamically
+- **Task 2**: Implement Snap Behavior and Tolerance
+  - Tolerance Zone: 5-pixel radius around guide lines
+  - Magnetic Snap: When object enters tolerance zone, snap to guide line
+  - Constrain movement: 
+    - If snapped to horizontal line, disable vertical movement
+    - If snapped to vertical line, disable horizontal movement
+  - Deselection: Release snap constraint when object moves >10px away from line
+  - Listen to `object:moving` event on Fabric.js canvas
+  - Calculate distance from object's bounding box center/edges to guide coordinates on every movement tick
+- **Task 3**: Visual Feedback (Guide Lines)
+  - Show guide lines only when object is actively being dragged and within tolerance zone
+  - Style: Thin (1px), dashed lines with high contrast color (#FF5733 orange or #33CCFF cyan)
+  - Lines disappear when user releases mouse/touch press
+  - Draw guide lines using `after:render` event or custom overlay
+  - Ensure guide lines don't interfere with object selection/manipulation
+- **Task 4**: Intersection and Corner Logic
+  - Dual-Axis Snap: Support simultaneous snapping to both horizontal and vertical guide lines
+  - Intersection Highlight: Show small contrasting circle/box at intersection point when dual-axis snap occurs
+  - Visual confirmation of corner alignment
+  - Handle edge cases where object snaps to multiple guides
+
+**Technical Considerations**:
+- Use `object:moving` event to detect when object is being dragged
+- Calculate snap distances on every movement tick for real-time feedback
+- Store snap state (which guide line is active, if any) during drag operation
+- Clear snap state on `object:modified` or `mouse:up`/`touch:end` events
+- Guide lines should be drawn on separate layer and not interfere with object selection
+- Consider performance impact of calculating snap distances on every frame
+- May need to debounce or optimize snap calculations for smooth performance
+
+**Files to Create**: 
+- `src/core-logic/alignmentUtils.ts` (snap point calculations, distance calculations, snap logic)
+
+**Files to Modify**: 
+- `src/components/containers/EditorCanvasContainer.tsx` (snap logic, guide line rendering, event handlers)
+- `src/config/canvasConfig.ts` (optional - snap tolerance constants, guide line styling)
+
+**User Experience**:
+- Snap should feel natural and not interfere with free-form positioning
+- Visual feedback should be clear but not distracting
+- Users should be able to easily break out of snap constraints
+- Guide lines should appear/disappear smoothly
+
+**Reference**: Similar to alignment guides in Figma, Adobe XD, Sketch, and other professional design tools
+
+**Potential Issues & Implementation Considerations**:
+
+**Critical Issues**:
+1. **Event Handler Conflict**: `object:moving` event is already used for delete zone detection. Need to integrate snap logic into the same handler, with delete zone taking priority.
+2. **Gesture State Conflicts**: Delete zone is disabled during gestures (`touchState.current.isGesturing || gestureState.current.mode`). Snap should also be disabled during gestures to avoid interference.
+3. **Movement Constraint Implementation**: Fabric.js doesn't have built-in movement constraints. Need to manually adjust `obj.left` or `obj.top` in the handler, which can cause feedback loops. Better approach: Use `obj.setCoords()` and check constraints before allowing movement.
+4. **Performance**: Snap calculations run on every `object:moving` tick (high frequency). Need to cache snap point calculations, use early returns, and optimize distance calculations.
+5. **Coordinate System Complexity**: Need to account for object center vs edges, rotated objects (bounding box changes), and scaled objects. Use Fabric.js methods like `obj.getBoundingRect()` or `obj.getCenterPoint()`.
+
+**Medium Priority Issues**:
+6. **Visual Feedback Coordination**: Grid overlay already uses `after:render` for drawing. Add guide lines to the same handler or create separate overlay layer.
+7. **Snap State Cleanup**: Need to clear snap state on `object:modified`, `mouse:up`, `selection:cleared`, and gesture start. Create cleanup function called from all exit points.
+8. **Dual-Axis Snap Complexity**: Handling simultaneous horizontal + vertical snaps requires careful state management. Track both axes separately, handle intersection point calculation.
+9. **Delete Zone Priority**: If object is near both delete zone (120px threshold) and snap guide (5px threshold), delete zone should take priority (check delete zone first, skip snap if in delete zone).
+10. **Touch vs Mouse Events**: Code handles both, but `mouse:up` might not fire on touch devices. Also listen to `touch:end` or use Fabric.js's unified event system.
+
+**Recommended Implementation Approach**:
+1. Create a separate snap state ref (similar to `touchState` and `gestureState`)
+2. Extract snap logic into a utility function for testability (`src/core-logic/alignmentUtils.ts`)
+3. Add config constant for snap tolerance (5px) for easy adjustment
+4. Consider making snap optional (toggle in settings) for users who prefer free-form positioning
+5. Test with rotated and scaled objects to ensure bounding box calculations are correct
+
+---
+
+**Task**: Implement magnetic snap-to-guide functionality to assist users in achieving perfect composition, similar to alignment aids in design software.
+
+**Expected Behavior**:
+- Objects snap to guide lines when dragged near them
+- Visual feedback shows guide lines when snapping occurs
+- Snap constraints prevent movement perpendicular to the guide line
+- Dual-axis snapping when object aligns to both horizontal and vertical guides
+
+**Implementation**:
+- **Task 1**: Define Alignment Targets (Snap Points)
+  - Canvas Center: Horizontal (Y-axis middle) and Vertical (X-axis middle)
+  - Canvas Quarters: Horizontal and vertical lines at 25%, 50%, and 75% of canvas width/height
+  - Calculate snap point coordinates based on canvas dimensions
+- **Task 2**: Implement Snap Behavior and Tolerance
+  - Tolerance Zone: 5-pixel radius around guide lines
+  - Magnetic Snap: When object enters tolerance zone, snap to guide line
+  - Constrain movement: If snapped to horizontal line, disable vertical movement; if snapped to vertical line, disable horizontal movement
+  - Deselection: Release snap constraint when object moves >10px away from line
+  - Listen to `object:moving` event on Fabric.js canvas
+  - Calculate distance from object's bounding box center/edges to guide coordinates
+- **Task 3**: Visual Feedback (Guide Lines)
+  - Show guide lines only when object is actively being dragged and within tolerance zone
+  - Style: Thin (1px), dashed lines with high contrast color (#FF5733 orange or #33CCFF cyan)
+  - Lines disappear when user releases mouse/touch press
+  - Draw guide lines using `after:render` event or custom overlay
+- **Task 4**: Intersection and Corner Logic
+  - Dual-Axis Snap: Support simultaneous snapping to both horizontal and vertical guide lines
+  - Intersection Highlight: Show small contrasting circle/box at intersection point when dual-axis snap occurs
+  - Visual confirmation of corner alignment
+
+**Files to Modify**: 
+- `src/components/containers/EditorCanvasContainer.tsx` (snap logic, guide line rendering)
+- `src/core-logic/alignmentUtils.ts` (new file - snap point calculations, distance calculations)
+- `src/config/canvasConfig.ts` (optional - snap tolerance constants)
+
+**Technical Notes**:
+- Use `object:moving` event to detect when object is being dragged
+- Calculate snap distances on every movement tick for real-time feedback
+- Store snap state (which guide line is active, if any) during drag operation
+- Clear snap state on `object:modified` or `mouse:up` events
+- Guide lines should be drawn on separate layer and not interfere with object selection
+
+**Reference**: Similar to alignment guides in Figma, Adobe XD, and other design tools
+
+---
+
 ## 📋 Implementation Priority Order
 
 1. **Add Accessibility Features** - Important for inclusivity
 2. **Performance Optimizations** - Improves user experience
 3. **Create Deployment Documentation** - Essential for production
-4. **Grid Overlay/Guides** - Professional compositional aid
+4. **Smart Alignment Guides (Snap-to-Guide)** - Professional alignment aid (complements Grid Overlay)
 5. **Asset Lazy Loading** - Performance improvement
 6. **Canvas Bitmapping/Caching** - Performance improvement
 7. **Touch Hit-Testing Optimization** - Mobile UX improvement

@@ -57,12 +57,14 @@ This roadmap is organized into focused documents for easier navigation:
 **Active Sprint Items**: See [Active Work](./active/current.md)
 
 **Current Priority**:
-1. **Layering (Bring to Front)** - 🚧 Currently working on
-2. **Font Scaling Display** - Next
+1. ✅ **Layering** - Complete (Fabric.js handles automatically)
+2. ✅ **Font Scaling Display** - Complete (Touch scaling sufficient, manual input deferred to accessibility)
 
-**Reference**: [Mobile UX Checklist](../mobile_ux_checklist.md) - 8/10 items complete (80%)
+**Reference**: [Mobile UX Checklist](../mobile_ux_checklist.md) - 9/10 items complete (90%)
 
 **Recently Completed**: 
+- ✅ Layering (Mobile UX #8) - Automatic bring-to-front on selection
+- ✅ Font Scaling Display (Mobile UX #9) - Touch scaling sufficient, minimal UI
 - ✅ Drag-to-Delete Zone (Mobile UX #7)
 - ✅ Color Picker with mobile-friendly modal
 - ✅ Font Picker with mobile-friendly modal

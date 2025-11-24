@@ -128,29 +128,21 @@ These are high-priority features that should be implemented next. They represent
 ---
 
 ### 3. Font Scaling Display
-- **Priority**: 🔴 Critical (Mobile UX Checklist Item #9)
-- **Status**: ⏸️ **NEXT**
+- **Priority**: ✅ **COMPLETE** (Touch scaling sufficient)
+- **Status**: ✅ **DONE** (Deferred manual input to accessibility)
 - **Source**: [Mobile UX Checklist](../../mobile_ux_checklist.md) - Item #9
 
-**Task**: Scale via pinch/handles.
+**Decision**: Touch scaling via pinch/handles is sufficient for mobile-first design. Manual font size input deferred to accessibility features (see Medium Priority - Accessibility).
 
-**Expected Behavior**: 
-- The corresponding Font Size Slider value in the controls panel updates in real-time
-- Bridges the gap between touch input and numerical input
+**Completed**:
+- ✅ Touch scaling works smoothly and intuitively
+- ✅ Users can scale text via pinch gestures and handles
+- ✅ Minimal UI approach maintained
 
-**Implementation**:
-- **Task 1**: Calculate font size from scale
-  - When object is scaled via pinch/handles, calculate equivalent font size
-  - Formula: `fontSize = baseFontSize * scaleX` (or average of scaleX/scaleY)
-- **Task 2**: Update slider in real-time
-  - Sync slider value with calculated font size
-  - Update as user scales object
-  - Ensure slider reflects current scale
-
-**Files to Modify**: 
-- `src/components/containers/EditorCanvasContainer.tsx` (calculate font size from scale)
-- `src/App.tsx` (update slider value)
-- `src/state/editorStore.ts` (sync fontSize with scale)
+**Deferred to Accessibility**:
+- Manual font size input field/slider for users who cannot use touch scaling
+- Provides precise control and accessibility for users with motor impairments
+- See [Medium Priority - Accessibility](./medium-priority.md#1-add-accessibility-features)
 
 **Reference**: See [Mobile UX Checklist](../../mobile_ux_checklist.md)
 

@@ -298,6 +298,47 @@ This document lists all completed feature implementations across core functional
 
 ---
 
+### 15. Layering (Automatic Bring-to-Front)
+- **Status**: ✅ **COMPLETE**
+- **Priority**: 🔴 Critical (Mobile UX Checklist #8)
+- **Completion Date**: 2025-11-23
+
+**Implementation**:
+- ✅ Fabric.js automatically brings selected objects to front
+- ✅ No explicit button needed - selection handles layering naturally
+- ✅ Visual layer management panel added to future roadmap for advanced use cases
+- ✅ Minimal UI approach maintained
+
+**Decision**: Since Fabric.js handles layering automatically when objects are selected, an explicit "Bring to Front" button is redundant. Users can bring objects to front simply by selecting them.
+
+**Files Modified**: 
+- `src/App.tsx` (removed redundant button)
+- `src/state/editorStore.ts` (removed bringToFront action)
+- `src/components/containers/EditorCanvasContainer.tsx` (removed reordering logic)
+
+**Future Enhancement**: Visual layer management panel (see [Future Considerations](../planned/future.md#2-visual-layer-management-panel))
+
+---
+
+### 16. Font Scaling Display
+- **Status**: ✅ **COMPLETE**
+- **Priority**: 🔴 Critical (Mobile UX Checklist #9)
+- **Completion Date**: 2025-11-23
+
+**Implementation**:
+- ✅ Touch scaling via pinch/handles works smoothly and intuitively
+- ✅ Removed read-only font size display for minimal UI approach
+- ✅ Manual font size input deferred to accessibility features
+
+**Decision**: Touch scaling is sufficient for mobile-first design. Manual input will be added as an accessibility feature for users who cannot use touch scaling.
+
+**Files Modified**: 
+- `src/App.tsx` (removed font size display)
+
+**Future Enhancement**: Manual font size input for accessibility (see [Medium Priority - Accessibility](../planned/medium-priority.md#1-add-accessibility-features))
+
+---
+
 ## ✅ Feature Completion Summary
 
 **Core Features Completed**: 11/12 (92%)
@@ -312,6 +353,8 @@ This document lists all completed feature implementations across core functional
 - ✅ Drag-to-Delete Zone
 - ✅ Color Picker
 - ✅ Font Picker
+- ✅ Layering (Automatic Bring-to-Front)
+- ✅ Font Scaling Display (Touch scaling)
 
 **UX Improvements Completed**: 3/8 (38%)
 - ✅ Mobile-First Design

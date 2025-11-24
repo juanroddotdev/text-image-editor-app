@@ -483,21 +483,6 @@ function App() {
                 </svg>
               </button>
 
-              {/* Font Size Display (read-only, shows current size) */}
-              <div 
-                className="w-12 h-12 flex items-center justify-center rounded-full shadow-lg"
-                style={{
-                  background: 'rgba(255, 255, 255, 0.15)',
-                  backdropFilter: 'blur(20px) saturate(180%)',
-                  WebkitBackdropFilter: 'blur(20px) saturate(180%)',
-                  border: '1px solid rgba(255, 255, 255, 0.3)',
-                }}
-              >
-                <span className="text-white/90 text-xs font-semibold">
-                  {objects.find(obj => obj.id === activeObjectId)?.fontSize || 48}
-                </span>
-              </div>
-
             </>
           )}
           </div>

@@ -24,22 +24,16 @@
 ### 🎯 PRIORITY: Complete Mobile UX Checklist
 - **Status**: 🟡 **IN PROGRESS**
 - **Current Focus**: Complete all remaining items from [Mobile UX Checklist](../../mobile_ux_checklist.md)
-- **Progress**: 7/10 items complete (70%)
-- **Remaining Items**: 3 items left to complete
+- **Progress**: 8/10 items complete (80%)
+- **Remaining Items**: 2 items left to complete
 
 **Active Items** (from Mobile UX Checklist):
-1. **Item #7: Deletion (Drag-to-Delete Zone)** - 🚧 **CURRENTLY WORKING ON**
-   - Drag selected text object towards bottom of screen
-   - Visual Delete Zone (trash can) appears
-   - Releasing object in zone triggers deletion
-   - Intuitive, high-confidence gesture for object removal
-
-2. **Item #8: Layering** - ⏸️ **NEXT**
+1. **Item #8: Layering** - 🚧 **CURRENTLY WORKING ON**
    - Dedicated "Bring to Front" button/icon in control panel when selected
    - Moves object to top of stack
    - Essential for stacking multiple objects
 
-3. **Item #9: Font Scaling Display** - ⏸️ **NEXT**
+2. **Item #9: Font Scaling Display** - ⏸️ **NEXT**
    - When scaling via pinch/handles, Font Size Slider updates in real-time
    - Bridges gap between touch input and numerical input
 
@@ -50,7 +44,6 @@
 ## Items On Hold (After Mobile UX Checklist Complete)
 
 ### High Priority Items (Deferred)
-1. **Complete UI Controls** - Connect Font/Color picker icons to actual functionality
 2. **Add Testing Infrastructure** - Set up Vitest/Jest for unit tests
 3. **Replace Alert() with Toast System** - Implement proper error notifications
 4. **Remove Console.log Statements** - Clean up production code
@@ -76,6 +69,26 @@ _No items currently blocked_
 
 ## Recently Completed (From Active Work)
 
+- ✅ **Item #7: Deletion (Drag-to-Delete Zone)** - Drag-to-delete functionality implemented (Completed: 2025-11-23)
+  - Visual delete zone appears when dragging objects toward bottom (120px threshold)
+  - Red gradient UI with trash icon and "Release to Delete" text
+  - Prevents activation during gestures (pinch/rotate)
+  - Files modified: `src/components/containers/EditorCanvasContainer.tsx`, `src/state/editorStore.ts`, `src/App.tsx`
+- ✅ **Color Picker** - Mobile-friendly color selection modal (Completed: 2025-11-23)
+  - Semi-transparent modal (85% opacity) for real-time preview
+  - Preset color swatches and custom color input
+  - Swipe-down gesture to close, stays open on selection
+  - Files modified: `src/App.tsx`
+- ✅ **Font Picker** - Mobile-friendly font selection modal (Completed: 2025-11-23)
+  - Semi-transparent modal matching color picker design
+  - Scrollable font list with preview text
+  - Swipe-down gesture to close, stays open on selection
+  - Files modified: `src/App.tsx`
+- ✅ **UI Improvements** - Icon updates and visibility controls (Completed: 2025-11-23)
+  - Changed Add Text button icon to I-Beam cursor
+  - Changed Font button icon to "Aa"
+  - Hide control panel until image is loaded
+  - Files modified: `src/App.tsx`
 - ✅ **Fix Mobile Browser Layout Issue** - Bottom toolbar now visible on mobile browsers (Completed: 2025-11-23)
   - Fixed viewport height calculation using JavaScript-set CSS variable `--vh`
   - Container now uses actual `window.innerHeight` instead of `100dvh`

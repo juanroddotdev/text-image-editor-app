@@ -29,11 +29,11 @@ This document outlines the implementation phases for the Text-Image-Editor appli
 
 ---
 
-## Phase 1: Web MVP (Foundation) 🟡 NEAR COMPLETE
+## Phase 1: Web MVP (Foundation) ✅ COMPLETE
 
 **Goal**: Establish a fully functional, production-ready web application that delivers the core "Text-on-Image" value proposition.
 
-**Status**: 🟡 **95% COMPLETE** - Most items done, UI controls missing
+**Status**: ✅ **100% COMPLETE** - All Phase 1 items implemented
 
 ### Core Features (Completed)
 1. ✅ **Smart Image Upload** - File input, validation, auto-scaling
@@ -44,11 +44,8 @@ This document outlines the implementation phases for the Text-Image-Editor appli
 6. ✅ **Multi-Touch Gesture Engine** - Pinch, twist, drag support
 7. ✅ **Keyboard Shortcuts** - Delete key support
 8. ✅ **Selection Style Configuration** - Mobile-friendly handles
-
-### Missing Features
-1. ❌ **Font Family Picker** - Icon exists, functionality missing
-2. ❌ **Color Picker** - Icon exists, functionality missing
-3. ❌ **Text Alignment** - Icon exists, functionality missing
+9. ✅ **Font Family Picker** - Mobile-friendly modal with preview
+10. ✅ **Color Picker** - Mobile-friendly modal with swatches and custom input
 
 **Estimated Time**: 3-4 weeks  
 **Dependencies**: Phase 0 (requires architecture foundation)
@@ -59,32 +56,31 @@ This document outlines the implementation phases for the Text-Image-Editor appli
 
 **Goal**: Refine the user experience for actual mobile web users and prepare the codebase for eventual React Native migration.
 
-**Status**: 🟡 **70% COMPLETE** - Mobile UX Checklist 7/10 items done
-
-**🔴 CRITICAL BUG**: Fix mobile browser layout issue (bottom toolbar hidden) - Must be fixed first
+**Status**: 🟡 **80% COMPLETE** - Mobile UX Checklist 8/10 items done
 
 **⚠️ CURRENT PRIORITY**: 
-1. Fix critical layout bug (bottom toolbar hidden)
-2. Complete remaining Mobile UX Checklist items before other Phase 2 work
+1. Complete remaining Mobile UX Checklist items (2 items left)
 
 ### Critical Bug (Completed)
 - ✅ **Mobile Browser Layout Fix** - Bottom toolbar now visible on mobile browsers - Fixed using JavaScript-set CSS variable `--vh`
 
-### Completed (Mobile UX Checklist Items 1-6, 10)
+### Completed (Mobile UX Checklist Items 1-7, 10)
 - ✅ **Item #1: Move (Pan)** - Single-finger drag
 - ✅ **Item #2: Scale (Zoom)** - Two-finger pinch
 - ✅ **Item #3: Rotate** - Two-finger twist
 - ✅ **Item #4: Edit Content** - Double-tap to edit
 - ✅ **Item #5: Selection Handles** - Visual bounding box
 - ✅ **Item #6: Deselect (Commit)** - Tap outside to deselect
+- ✅ **Item #7: Deletion (Drag-to-Delete Zone)** - Visual delete zone with swipe gesture
 - ✅ **Item #10: Performance** - 60fps maintained
 - ✅ **Multi-Touch Engine** - Drag, Pinch, Rotate support
 - ✅ **Trackpad Gesture Mocking** - Desktop gesture simulation
 
-### In Progress (Mobile UX Checklist Items 7-9)
-- ⏸️ **Item #7: Deletion (Drag-to-Delete Zone)** - Next after layout fix
-- ⏸️ **Item #8: Layering (Bring to Front)** - Next
+### In Progress (Mobile UX Checklist Items 8-9 + New Items)
+- 🚧 **Item #8: Layering (Bring to Front)** - Currently working on
 - ⏸️ **Item #9: Font Scaling Display** - Next
+- 🆕 **Layer Management** - Complete Bring to Front/Send to Back (Moved from Phase 4)
+- 🆕 **Grid Overlay/Guides** - Simple 3x3 and Rule of Thirds grid toggle (New Feature)
 
 ### Deferred (After Critical Bug & Mobile UX Checklist Complete)
 - ⏸️ **Background Image Manipulation** - Move, scale, rotate background image
@@ -99,9 +95,9 @@ This document outlines the implementation phases for the Text-Image-Editor appli
 
 ---
 
-## Phase 3: Quality & Polish ⏸️ PLANNED
+## Phase 3: Quality, Usability & Polish ⏸️ PLANNED
 
-**Goal**: Improve code quality, add testing, enhance user experience, and prepare for production.
+**Goal**: Implement essential quality-of-life features (Undo/Redo) and critical legibility features (Text Background/Stroke). Improve code quality, add testing, enhance user experience, and prepare for production.
 
 **Status**: ⏸️ **PLANNED** - Not started
 
@@ -117,11 +113,13 @@ This document outlines the implementation phases for the Text-Image-Editor appli
 3. ⏸️ **Improve TypeScript Types** - Remove `any` types
 4. ⏸️ **Extract Magic Numbers** - Constants file
 
-### UX Enhancements
-1. ⏸️ **Accessibility Features** - ARIA labels, keyboard navigation
-2. ⏸️ **Performance Optimizations** - Memoization, lazy loading
-3. ⏸️ **Asset Lazy Loading** - Defer non-critical fonts
-4. ⏸️ **Canvas Bitmapping** - Cache background layers
+### UX Enhancements (CRITICAL for Usability)
+1. 🆕 **Undo/Redo History** - History stack for all major actions (Moved from Phase 4)
+2. 🆕 **Advanced Text Effects** - Implement Stroke and Background Fill for legibility (Moved from Phase 4)
+3. ⏸️ **Accessibility Features** - ARIA labels, keyboard navigation
+4. ⏸️ **Performance Optimizations** - Memoization, lazy loading
+5. ⏸️ **Asset Lazy Loading** - Defer non-critical fonts
+6. ⏸️ **Canvas Bitmapping** - Cache background layers
 
 **Estimated Time**: 3-4 weeks  
 **Dependencies**: Phase 2 (can start in parallel)
@@ -134,18 +132,17 @@ This document outlines the implementation phases for the Text-Image-Editor appli
 
 **Status**: ⏸️ **PLANNED** - Future considerations
 
+**Note**: Undo/Redo and Advanced Text Effects (Stroke/Background) have been moved to Phase 3 as critical usability features.
+
 ### Creative Tools
-1. ⏸️ **Advanced Text Effects** - Stroke, shadows, backgrounds
-2. ⏸️ **Layer Management** - Bring to front/send to back
-3. ⏸️ **Sticker Library** - Emojis and stickers
-4. ⏸️ **Image Filters** - Grayscale, sepia, brightness
-5. ⏸️ **Custom Shapes** - Rectangles, circles, arrows
+1. ⏸️ **Sticker Library** - Emojis and stickers
+2. ⏸️ **Image Filters** - Grayscale, sepia, brightness
+3. ⏸️ **Custom Shapes** - Rectangles, circles, arrows
 
 ### Project Management
-1. ⏸️ **Undo/Redo** - History stack
-2. ⏸️ **Save/Load Projects** - LocalStorage persistence
-3. ⏸️ **Cloud Sync** - Firebase integration
-4. ⏸️ **Templates** - Pre-set layouts
+1. ⏸️ **Save/Load Projects** - LocalStorage persistence
+2. ⏸️ **Cloud Sync** - Firebase integration
+3. ⏸️ **Templates** - Pre-set layouts
 
 **Estimated Time**: Ongoing  
 **Dependencies**: Phase 3 (quality foundation needed)
@@ -173,10 +170,10 @@ This document outlines the implementation phases for the Text-Image-Editor appli
 
 | Priority | Impact | Effort | Phase | Items |
 |----------|--------|--------|-------|-------|
-| 🔴 Critical | High | Medium | 1 | UI Controls, Testing |
-| 🟠 High | High | Low | 1-2 | Error Handling, Mobile UX |
+| 🔴 Critical | High | Medium | 1-2 | Legibility Styles, Undo/Redo, Mobile UX, Testing |
+| 🟠 High | High | Low | 2-3 | Error Handling, Grid Overlay, Layer Management |
 | 🟡 Medium | Medium | Medium | 2-3 | Performance, Accessibility |
-| 🔵 Low | Low | High | 4-5 | Advanced Features, Native App |
+| 🔵 Low | Low | High | 4-5 | Stickers, Advanced Features, Native App |
 
 ---
 
@@ -199,19 +196,22 @@ This document outlines the implementation phases for the Text-Image-Editor appli
 - ✅ Core logic 100% portable
 - ✅ Data access layer abstracted
 
-### Phase 1 Success Criteria: 🟡 95% Complete
+### Phase 1 Success Criteria: ✅ 100% Complete
 - ✅ Core features working
-- ⚠️ UI controls need completion
+- ✅ UI controls complete (Font & Color pickers implemented)
 - ✅ Export pipeline functional
 - ✅ Gestures implemented
 
-### Phase 2 Success Criteria: 🟡 40% Complete
+### Phase 2 Success Criteria: 🟡 80% Complete
 - ✅ Multi-touch gestures working
 - ⏸️ Mobile UX polish needed
+- 🆕 Grid Overlay implemented
+- 🆕 Layer Management complete
 - ⏸️ Keyboard handling needed
-- ⏸️ Safe areas needed
 
 ### Phase 3 Success Criteria: ⏸️ Not Started
+- 🆕 Undo/Redo implemented
+- 🆕 Text Legibility Styles implemented
 - ⏸️ Automated tests in place
 - ⏸️ Error handling improved
 - ⏸️ Code quality improved

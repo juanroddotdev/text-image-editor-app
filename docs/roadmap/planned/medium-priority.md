@@ -187,16 +187,71 @@ These are medium-priority features that enhance the application but are not crit
 
 ---
 
+### 9. Grid Overlay/Guides
+- **Priority**: 🟡 Medium
+- **Status**: ❌ Not Implemented
+- **Current State**: No compositional guides available
+
+**Description**: 
+Professional compositional aids for optimal text and sticker placement, which is key to a high-quality editor.
+
+**Implementation**:
+- **Task 1**: Add toggle button to control panel
+  - Add grid overlay toggle button to right-edge control panel
+  - Button cycles between: Off → 3x3 Grid → Rule of Thirds → Golden Ratio → Off
+  - Visual indicator showing current mode (icon or label)
+- **Task 2**: Implement 3x3 Grid overlay
+  - Draw simple 3x3 grid lines on canvas
+  - Grid lines evenly divide canvas into 9 equal sections
+  - Lines drawn above background image but below interactive objects
+- **Task 3**: Implement Rule of Thirds Grid
+  - Draw Rule of Thirds grid (2 horizontal + 2 vertical lines at 1/3 and 2/3 positions)
+  - Standard compositional guide for balanced layouts
+- **Task 4**: Implement Golden Ratio overlay
+  - Draw Golden Ratio spiral and/or rectangles
+  - Provides classical compositional guidance
+  - May use Fibonacci spiral approximation
+- **Task 5**: Canvas layer management
+  - Ensure grid is drawn on separate layer above background
+  - Grid must not interfere with object selection/manipulation
+  - Grid should be non-interactive (not selectable)
+
+**Technical Considerations**:
+- Grid should be drawn using Fabric.js overlay or custom canvas drawing
+- Consider using `canvas.renderOnAddRemove = false` during grid drawing for performance
+- Grid lines should be semi-transparent (e.g., 30-50% opacity)
+- Grid color should contrast with both light and dark images (consider white with shadow or configurable color)
+
+**Files to Create**: 
+- `src/components/presentational/GridOverlay.tsx` (optional, if component-based)
+- `src/core-logic/gridUtils.ts` (grid calculation functions)
+
+**Files to Modify**: 
+- `src/App.tsx` (add toggle button to control panel)
+- `src/components/containers/EditorCanvasContainer.tsx` (grid rendering logic)
+- `src/state/editorStore.ts` (add grid mode state)
+
+**User Experience**:
+- Toggle button should be easily accessible in control panel
+- Grid should be subtle but visible
+- User can turn grid off when not needed
+- Grid helps with professional composition placement
+
+**Reference**: Professional photo editing apps (Photoshop, Canva, etc.) commonly include grid overlays
+
+---
+
 ## 📋 Implementation Priority Order
 
 1. **Add Accessibility Features** - Important for inclusivity
 2. **Performance Optimizations** - Improves user experience
 3. **Create Deployment Documentation** - Essential for production
-4. **Asset Lazy Loading** - Performance improvement
-5. **Canvas Bitmapping/Caching** - Performance improvement
-6. **Touch Hit-Testing Optimization** - Mobile UX improvement
-7. **Seamless Gesture Transitions** - Mobile UX improvement
-8. **Haptic Feedback** - Nice-to-have enhancement
+4. **Grid Overlay/Guides** - Professional compositional aid
+5. **Asset Lazy Loading** - Performance improvement
+6. **Canvas Bitmapping/Caching** - Performance improvement
+7. **Touch Hit-Testing Optimization** - Mobile UX improvement
+8. **Seamless Gesture Transitions** - Mobile UX improvement
+9. **Haptic Feedback** - Nice-to-have enhancement
 
 ---
 

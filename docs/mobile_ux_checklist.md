@@ -39,7 +39,7 @@ This checklist details the essential expected behaviors for the text box object 
 
 ## III. Secondary Controls and Destruction
 
-- [ ] **7. Deletion (Drag-to-Delete Zone)**
+- [x] **7. Deletion (Drag-to-Delete Zone)**
     - **Task**: Drag the selected text object towards the bottom of the screen.
     - **Expected Behavior**: A Visual Delete Zone (e.g., trash can) appears. Releasing the object in this zone triggers deletion.
     - **Rationale**: Intuitive, high-confidence gesture for object removal.

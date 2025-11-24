@@ -1,7 +1,46 @@
 # Roadmap Changelog
 
 **Last Updated**: November 23, 2025  
-**Current Version**: 2.0
+**Current Version**: 2.4
+
+---
+
+## Version 2.4 (November 23, 2025)
+
+### Completed Items
+- ✅ **Item #7: Deletion (Drag-to-Delete Zone)** - Mobile UX Checklist item completed
+  - Visual delete zone appears when dragging objects toward bottom (120px threshold)
+  - Red gradient UI with trash icon and "Release to Delete" text
+  - Delete objects by releasing in delete zone
+  - Prevents activation during gestures (pinch/rotate)
+  - Files modified: `src/components/containers/EditorCanvasContainer.tsx`, `src/state/editorStore.ts`, `src/App.tsx`
+  - Completion date: 2025-11-23
+
+- ✅ **Color Picker** - Mobile-friendly color selection modal
+  - Semi-transparent modal (85% opacity) for real-time preview
+  - Preset color swatches and custom color input
+  - Swipe-down gesture to close, stays open on selection
+  - Files modified: `src/App.tsx`
+  - Completion date: 2025-11-23
+
+- ✅ **Font Picker** - Mobile-friendly font selection modal
+  - Semi-transparent modal matching color picker design
+  - Scrollable font list with preview text
+  - Swipe-down gesture to close, stays open on selection
+  - Files modified: `src/App.tsx`
+  - Completion date: 2025-11-23
+
+- ✅ **UI Icon and Visibility Improvements**
+  - Changed Add Text button icon to I-Beam cursor
+  - Changed Font button icon to "Aa"
+  - Hide control panel until image is loaded
+  - Files modified: `src/App.tsx`
+  - Completion date: 2025-11-23
+
+### Progress Updates
+- Mobile UX Checklist: 8/10 items complete (80%) - up from 70%
+- Core Features: 11/12 complete (92%) - up from 67%
+- Overall Completion: ~51% - up from ~42%
 
 ---
 

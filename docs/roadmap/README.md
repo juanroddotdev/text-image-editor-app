@@ -9,17 +9,17 @@
 
 ### Overall Progress
 - **Total Items**: 45 features/issues identified
-- **Completed**: 19 items ✅
+- **Completed**: 23 items ✅
 - **In Progress**: Check [Active Work](./active/current.md)
 - **Planned**: See [Planned Features](./planned/)
-- **Overall Completion**: ~42%
+- **Overall Completion**: ~51%
 
 ### Key Metrics
 
 | Category | Status | Progress |
 |----------|--------|----------|
 | 🏗️ Architecture | ✅ Complete | 5/5 (100%) |
-| 🟠 Core Features | 🟡 In Progress | 8/12 (67%) |
+| 🟠 Core Features | 🟡 In Progress | 11/12 (92%) |
 | 🟡 Enhancements | 🟡 In Progress | 3/8 (38%) |
 | 🐛 Bug Fixes | ✅ Complete | 1/1 (100%) |
 | 📝 Testing | ❌ Not Started | 0/10 (0%) |
@@ -57,17 +57,20 @@ This roadmap is organized into focused documents for easier navigation:
 **Active Sprint Items**: See [Active Work](./active/current.md)
 
 **Current Priority**:
-1. **Deletion (Drag-to-Delete Zone)** - 🚧 Currently working on
-2. **Layering (Bring to Front)** - Next
-3. **Font Scaling Display** - Next
+1. **Layering (Bring to Front)** - 🚧 Currently working on
+2. **Font Scaling Display** - Next
 
-**Reference**: [Mobile UX Checklist](../mobile_ux_checklist.md) - 7/10 items complete (70%)
+**Reference**: [Mobile UX Checklist](../mobile_ux_checklist.md) - 8/10 items complete (80%)
 
-**Recently Completed**: ✅ Fix Mobile Browser Layout - Bottom toolbar now visible on mobile browsers
+**Recently Completed**: 
+- ✅ Drag-to-Delete Zone (Mobile UX #7)
+- ✅ Color Picker with mobile-friendly modal
+- ✅ Font Picker with mobile-friendly modal
+- ✅ UI icon updates and visibility improvements
+- ✅ Fix Mobile Browser Layout - Bottom toolbar now visible on mobile browsers
 
-**Deferred Until Critical Bug & Mobile UX Checklist Complete**:
+**Deferred Until Mobile UX Checklist Complete**:
 - Background Image Manipulation (move, scale, rotate background)
-- Complete UI controls (Font/Color pickers)
 - Add automated testing infrastructure
 - Improve error handling (replace alerts)
 - Other mobile UX refinements

@@ -325,6 +325,29 @@ Magnetic snap-to-guide functionality to assist users in achieving perfect compos
 
 **Reference**: Similar to alignment guides in Figma, Adobe XD, Sketch, and other professional design tools
 
+**Potential Issues & Implementation Considerations**:
+
+**Critical Issues**:
+1. **Event Handler Conflict**: `object:moving` event is already used for delete zone detection. Need to integrate snap logic into the same handler, with delete zone taking priority.
+2. **Gesture State Conflicts**: Delete zone is disabled during gestures (`touchState.current.isGesturing || gestureState.current.mode`). Snap should also be disabled during gestures to avoid interference.
+3. **Movement Constraint Implementation**: Fabric.js doesn't have built-in movement constraints. Need to manually adjust `obj.left` or `obj.top` in the handler, which can cause feedback loops. Better approach: Use `obj.setCoords()` and check constraints before allowing movement.
+4. **Performance**: Snap calculations run on every `object:moving` tick (high frequency). Need to cache snap point calculations, use early returns, and optimize distance calculations.
+5. **Coordinate System Complexity**: Need to account for object center vs edges, rotated objects (bounding box changes), and scaled objects. Use Fabric.js methods like `obj.getBoundingRect()` or `obj.getCenterPoint()`.
+
+**Medium Priority Issues**:
+6. **Visual Feedback Coordination**: Grid overlay already uses `after:render` for drawing. Add guide lines to the same handler or create separate overlay layer.
+7. **Snap State Cleanup**: Need to clear snap state on `object:modified`, `mouse:up`, `selection:cleared`, and gesture start. Create cleanup function called from all exit points.
+8. **Dual-Axis Snap Complexity**: Handling simultaneous horizontal + vertical snaps requires careful state management. Track both axes separately, handle intersection point calculation.
+9. **Delete Zone Priority**: If object is near both delete zone (120px threshold) and snap guide (5px threshold), delete zone should take priority (check delete zone first, skip snap if in delete zone).
+10. **Touch vs Mouse Events**: Code handles both, but `mouse:up` might not fire on touch devices. Also listen to `touch:end` or use Fabric.js's unified event system.
+
+**Recommended Implementation Approach**:
+1. Create a separate snap state ref (similar to `touchState` and `gestureState`)
+2. Extract snap logic into a utility function for testability (`src/core-logic/alignmentUtils.ts`)
+3. Add config constant for snap tolerance (5px) for easy adjustment
+4. Consider making snap optional (toggle in settings) for users who prefer free-form positioning
+5. Test with rotated and scaled objects to ensure bounding box calculations are correct
+
 ---
 
 **Task**: Implement magnetic snap-to-guide functionality to assist users in achieving perfect composition, similar to alignment aids in design software.

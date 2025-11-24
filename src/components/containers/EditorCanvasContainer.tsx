@@ -36,6 +36,8 @@ export const EditorCanvasContainer: React.FC = () => {
     objects,
     setActiveObject,
     updateObject,
+    deleteObject,
+    setDeleteZoneActive,
   } = useEditorStore();
 
   // Initialize Fabric.js canvas
@@ -72,20 +74,107 @@ export const EditorCanvasContainer: React.FC = () => {
       setActiveObject(null);
     });
 
+    // Delete zone threshold (distance from bottom in pixels)
+    const DELETE_ZONE_THRESHOLD = 120; // Show delete zone when object is within 120px of bottom
 
+    // Track object being dragged for delete zone detection
+    let draggedObject: any = null;
+
+    // Handle object moving (dragging) - detect if near bottom for delete zone
+    canvas.on('object:moving', (e) => {
+      const obj = e.target;
+      if (!obj) return;
+
+      // Don't show delete zone during gestures (pinch/rotate) or trackpad gestures
+      if (touchState.current.isGesturing || gestureState.current.mode) {
+        setDeleteZoneActive(false);
+        return;
+      }
+
+      draggedObject = obj;
+      const objBottom = (obj.top || 0) + (obj.getScaledHeight() || 0);
+      const distanceFromBottom = canvasHeight - objBottom;
+
+      // Show delete zone if object is dragged near bottom
+      if (distanceFromBottom < DELETE_ZONE_THRESHOLD && distanceFromBottom >= 0) {
+        setDeleteZoneActive(true);
+      } else {
+        setDeleteZoneActive(false);
+      }
+    });
 
     // Handle object modifications
     canvas.on('object:modified', (e) => {
       const obj = e.target;
-      if (obj && (obj as any).objectId) {
-        updateObject((obj as any).objectId, {
+      if (!obj) return;
+
+      const objId = (obj as any).objectId;
+      if (!objId) return;
+
+      // Check if object is in delete zone
+      const objBottom = (obj.top || 0) + (obj.getScaledHeight() || 0);
+      const distanceFromBottom = canvasHeight - objBottom;
+
+      if (distanceFromBottom < DELETE_ZONE_THRESHOLD && distanceFromBottom >= 0) {
+        // Object is in delete zone - delete it
+        deleteObject(objId);
+        setDeleteZoneActive(false);
+        draggedObject = null;
+      } else {
+        // Normal update - save position
+        updateObject(objId, {
           x: obj.left || 0,
           y: obj.top || 0,
           scaleX: obj.scaleX || 1,
           scaleY: obj.scaleY || 1,
           rotation: obj.angle || 0,
         });
+        setDeleteZoneActive(false);
+        draggedObject = null;
       }
+    });
+
+    // Also handle mouse:up to catch cases where object might not trigger modified event
+    canvas.on('mouse:up', (opt) => {
+      // Check if we were dragging an object near the delete zone
+      if (draggedObject && (draggedObject as any).objectId) {
+        const obj = draggedObject;
+        const objBottom = (obj.top || 0) + (obj.getScaledHeight() || 0);
+        const distanceFromBottom = canvasHeight - objBottom;
+
+        if (distanceFromBottom < DELETE_ZONE_THRESHOLD && distanceFromBottom >= 0) {
+          // Object is in delete zone - delete it
+          deleteObject((obj as any).objectId);
+          setDeleteZoneActive(false);
+          draggedObject = null;
+          canvas.discardActiveObject();
+          return;
+        }
+      }
+
+      // Existing mouse:up logic for trackpad gestures
+      const state = gestureState.current;
+      const target = canvas.getActiveObject();
+
+      if (state.mode && target) {
+        // Reset locks
+        target.lockMovementX = false;
+        target.lockMovementY = false;
+        canvas.selection = true;
+
+        // Sync with store
+        if ((target as any).objectId) {
+          updateObject((target as any).objectId, {
+            scaleX: target.scaleX,
+            scaleY: target.scaleY,
+            rotation: target.angle,
+          });
+        }
+      }
+
+      gestureState.current = { mode: null, startVal: 0, startPos: 0 };
+      setDeleteZoneActive(false);
+      draggedObject = null;
     });
 
     // Trackpad-friendly Gestures: Modifier + Drag
@@ -138,28 +227,6 @@ export const EditorCanvasContainer: React.FC = () => {
       canvas.requestRenderAll();
     });
 
-    canvas.on('mouse:up', () => {
-      const state = gestureState.current;
-      const target = canvas.getActiveObject();
-
-      if (state.mode && target) {
-        // Reset locks
-        target.lockMovementX = false;
-        target.lockMovementY = false;
-        canvas.selection = true;
-
-        // Sync with store
-        if ((target as any).objectId) {
-          updateObject((target as any).objectId, {
-            scaleX: target.scaleX,
-            scaleY: target.scaleY,
-            rotation: target.angle,
-          });
-        }
-      }
-
-      gestureState.current = { mode: null, startVal: 0, startPos: 0 };
-    });
 
     // --- Custom Multi-Touch Handler (Seamless Drag -> Gesture) ---
 

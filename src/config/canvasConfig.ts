@@ -81,8 +81,8 @@ export function applySelectionStyle(canvas: Canvas, style: SelectionStyle = ACTI
     ctx: CanvasRenderingContext2D,
     left: number,
     top: number,
-    styleOverride: any,
-    fabricObject: any
+    _styleOverride: any,
+    _fabricObject: any
   ) => {
     console.log('🔄 Rendering rotate control at:', left, top);
     const size = config.cornerSize;
@@ -157,7 +157,7 @@ export function applySelectionStyle(canvas: Canvas, style: SelectionStyle = ACTI
               ctx: CanvasRenderingContext2D,
               left: number,
               top: number,
-              styleOverride: any,
+              _styleOverride: any,
               fabricObject: any
             ) => {
               const size = config.cornerSize;

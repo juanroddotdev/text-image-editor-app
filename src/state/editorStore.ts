@@ -118,6 +118,7 @@ export const useEditorStore = create<EditorState>((set, get) => ({
     set({ isDeleteZoneActive: active });
   },
 
+
   clearCanvas: () => {
     set({
       baseImage: null,

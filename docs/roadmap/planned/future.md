@@ -28,17 +28,36 @@ These are future features and enhancements that are not currently prioritized bu
 
 ---
 
-### 2. Layer Management
+### 2. Visual Layer Management Panel
 - **Status**: ⏸️ Planned
 - **Priority**: 🔵 Low
 
 **Features**:
-- "Bring to Front" / "Send to Back" controls
-- Layer list/panel
-- Layer visibility toggle
-- Layer locking
+- Visual layer panel/drawer (similar to design tools like Figma, Canva)
+- Layer list showing all objects (text, images, shapes) with:
+  - Layer thumbnails/previews
+  - Layer type icons (T for text, image thumbnail for images)
+  - Layer names/labels (truncated text content for text layers)
+- Drag-and-drop reordering of layers
+- Layer selection from panel (selects object on canvas)
+- Layer visibility toggle (eye icon)
+- Layer locking (lock icon)
+- "Bring to Front" / "Send to Back" controls within panel
+- Panel toggle button (layers icon)
+- Mobile-friendly swipeable panel
 
-**Estimated Effort**: Medium
+**UI Design**:
+- Panel slides in from side or bottom
+- Each layer entry shows:
+  - Icon/thumbnail on left
+  - Layer name/label in center
+  - Visibility/lock controls on right
+- Active/selected layer highlighted
+- Smooth animations for reordering
+
+**Estimated Effort**: Medium-High
+
+**Note**: This provides a more intuitive way to manage layer stacking compared to the automatic "bring to front on selection" behavior. Users can see all layers at once and reorder them visually.
 
 ---
 

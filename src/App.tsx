@@ -497,6 +497,7 @@ function App() {
                   {objects.find(obj => obj.id === activeObjectId)?.fontSize || 48}
                 </span>
               </div>
+
             </>
           )}
           </div>

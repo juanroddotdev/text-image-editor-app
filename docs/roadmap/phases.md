@@ -59,17 +59,37 @@ This document outlines the implementation phases for the Text-Image-Editor appli
 
 **Goal**: Refine the user experience for actual mobile web users and prepare the codebase for eventual React Native migration.
 
-**Status**: 🟡 **40% COMPLETE** - Gestures done, UX polish needed
+**Status**: 🟡 **70% COMPLETE** - Mobile UX Checklist 7/10 items done
 
-### Completed
+**🔴 CRITICAL BUG**: Fix mobile browser layout issue (bottom toolbar hidden) - Must be fixed first
+
+**⚠️ CURRENT PRIORITY**: 
+1. Fix critical layout bug (bottom toolbar hidden)
+2. Complete remaining Mobile UX Checklist items before other Phase 2 work
+
+### Critical Bug (Completed)
+- ✅ **Mobile Browser Layout Fix** - Bottom toolbar now visible on mobile browsers - Fixed using JavaScript-set CSS variable `--vh`
+
+### Completed (Mobile UX Checklist Items 1-6, 10)
+- ✅ **Item #1: Move (Pan)** - Single-finger drag
+- ✅ **Item #2: Scale (Zoom)** - Two-finger pinch
+- ✅ **Item #3: Rotate** - Two-finger twist
+- ✅ **Item #4: Edit Content** - Double-tap to edit
+- ✅ **Item #5: Selection Handles** - Visual bounding box
+- ✅ **Item #6: Deselect (Commit)** - Tap outside to deselect
+- ✅ **Item #10: Performance** - 60fps maintained
 - ✅ **Multi-Touch Engine** - Drag, Pinch, Rotate support
 - ✅ **Trackpad Gesture Mocking** - Desktop gesture simulation
 
-### In Progress
-- 🟡 **Seamless Transitions** - Zero-latency gesture mode switching
-- 🟡 **Touch Hit-Testing** - Optimize touch target sizes (min 44px)
+### In Progress (Mobile UX Checklist Items 7-9)
+- ⏸️ **Item #7: Deletion (Drag-to-Delete Zone)** - Next after layout fix
+- ⏸️ **Item #8: Layering (Bring to Front)** - Next
+- ⏸️ **Item #9: Font Scaling Display** - Next
 
-### Planned
+### Deferred (After Critical Bug & Mobile UX Checklist Complete)
+- ⏸️ **Background Image Manipulation** - Move, scale, rotate background image
+- ⏸️ **Seamless Transitions** - Zero-latency gesture mode switching
+- ⏸️ **Touch Hit-Testing** - Optimize touch target sizes (min 44px)
 - ⏸️ **Virtual Keyboard Handling** - Prevent canvas resizing
 - ⏸️ **Safe Area Management** - Respect notches and home indicators
 - ⏸️ **Haptic Feedback** - Vibration patterns for actions

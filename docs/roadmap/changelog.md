@@ -5,6 +5,45 @@
 
 ---
 
+## Version 2.3 (November 23, 2025)
+
+### Completed Items
+- ✅ **Fix Mobile Browser Layout Issue** (Item #0) - Critical bug fixed
+  - Implemented JavaScript-based viewport height calculation using CSS variable `--vh`
+  - Container now uses actual `window.innerHeight` instead of `100dvh`
+  - Bottom toolbar now visible immediately on mobile browsers
+  - Files modified: `src/App.tsx`, `src/index.css`, `index.html`
+  - Completion date: 2025-11-23
+
+---
+
+## Version 2.2 (November 23, 2025)
+
+### New Items Added
+- 🔴 **Critical Bug**: Fix Mobile Browser Layout - Bottom toolbar hidden on load (Item #0)
+  - Added to high-priority as critical blocking issue
+  - Must be fixed before Mobile UX Checklist items
+  - Issue: Bottom toolbar appears below viewport, user must scroll
+- 🟠 **Feature**: Background Image Manipulation - Move, scale, rotate background image (Item #12)
+  - Added to high-priority as feature enhancement
+  - Allows users to manipulate background image like text objects
+  - Deferred until after critical bug and Mobile UX Checklist complete
+
+---
+
+## Version 2.1 (November 23, 2025)
+
+### Priority Shift: Mobile UX Checklist First
+- 🎯 **NEW PRIORITY**: Complete Mobile UX Checklist items before other roadmap work
+- 📋 Added Item #7 (Deletion - Drag-to-Delete Zone) to high-priority - Currently working on
+- 📋 Added Item #8 (Layering - Bring to Front) to high-priority - Next
+- 📋 Added Item #9 (Font Scaling Display) to high-priority - Next
+- 📋 Updated active work to reflect Mobile UX Checklist focus
+- 📋 Deferred all other high-priority items until Mobile UX Checklist is 100% complete
+- 📋 Updated Phase 2 status: 70% complete (7/10 Mobile UX Checklist items done)
+
+---
+
 ## Version 2.0 (November 23, 2025)
 
 ### Roadmap Reorganization

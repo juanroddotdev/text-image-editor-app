@@ -11,9 +11,154 @@ These are high-priority features that should be implemented next. They represent
 
 ---
 
-## 🔴 CRITICAL PRIORITY (Core User Flows)
+## 🔴 CRITICAL BUG: Mobile Browser Layout Fix
 
-### 1. Complete UI Controls
+### 0. Fix Mobile Browser Layout - Bottom Toolbar Hidden
+- **Priority**: 🔴 Critical Bug
+- **Status**: 🚧 **CURRENTLY WORKING ON**
+- **Issue**: Bottom toolbar is hidden on mobile browser load, user has to scroll to see it
+
+**Problem**: 
+- Bottom toolbar appears below viewport on mobile browsers
+- User must scroll down to access controls on initial load
+- Poor initial user experience
+- May be related to viewport height calculation (`100vh` vs `100dvh`) or safe area handling
+
+**Expected Behavior**: 
+- Bottom toolbar should be visible immediately on page load
+- No scrolling required to access controls
+- Layout should fit within viewport on all mobile devices
+
+**Implementation**:
+- **Task 1**: Investigate viewport height issue
+  - Check if `100vh` is causing problems on mobile browsers (address bar affects height)
+  - Test with `100dvh` (dynamic viewport height) if supported
+  - Use `100dvh` for modern browsers that support it, fallback to `100vh`
+  - Check for safe area insets affecting layout
+- **Task 2**: Fix layout to ensure toolbar visible
+  - Adjust container height calculation in `App.tsx`
+  - Ensure flex layout properly constrains content (`flex-1` on canvas, fixed height toolbar)
+  - Use `min-h-screen` or `h-screen` appropriately
+  - Consider using CSS Grid instead of Flexbox for better control
+- **Task 3**: Prevent scrolling on initial load
+  - Ensure page fits within viewport
+  - Lock scroll position if needed (`overflow-hidden` on body)
+  - Verify on different screen sizes (iPhone SE, iPhone 14 Pro, Android devices)
+  - Test with browser address bar visible and hidden
+
+**Files to Modify**: 
+- `src/App.tsx` (layout container, viewport handling)
+- `src/index.css` (viewport meta tag, CSS adjustments, body overflow)
+- `index.html` (viewport meta tag if needed)
+
+**Testing**:
+- Test on iOS Safari (various iPhone models)
+- Test on Chrome Android
+- Test with browser address bar visible and hidden
+- Test on different screen sizes
+- Verify no horizontal scrolling
+
+---
+
+## 🎯 CURRENT PRIORITY: Complete Mobile UX Checklist
+
+**⚠️ IMPORTANT**: These items from the [Mobile UX Checklist](../../mobile_ux_checklist.md) must be completed after fixing the critical layout bug.
+
+### 1. Deletion (Drag-to-Delete Zone)
+- **Priority**: 🔴 Critical (Mobile UX Checklist Item #7)
+- **Status**: 🚧 **CURRENTLY WORKING ON**
+- **Source**: [Mobile UX Checklist](../../mobile_ux_checklist.md) - Item #7
+
+**Task**: Drag the selected text object towards the bottom of the screen.
+
+**Expected Behavior**: 
+- A Visual Delete Zone (e.g., trash can) appears when dragging towards bottom
+- Releasing the object in this zone triggers deletion
+- Intuitive, high-confidence gesture for object removal
+
+**Implementation**:
+- **Task 1**: Detect drag gesture towards bottom of screen
+  - Monitor drag position during object movement
+  - Calculate distance from bottom edge
+  - Trigger threshold (e.g., within 100px of bottom)
+- **Task 2**: Display Visual Delete Zone
+  - Show trash can icon or delete zone indicator
+  - Animate appearance when threshold reached
+  - Visual feedback (color change, animation)
+- **Task 3**: Handle deletion on release
+  - Check if object released within delete zone
+  - Trigger delete action
+  - Remove object from canvas and store
+
+**Files to Modify**: 
+- `src/components/containers/EditorCanvasContainer.tsx` (drag handling, delete zone)
+- `src/App.tsx` (delete zone UI component if needed)
+
+**Reference**: See [Mobile UX Checklist](../../mobile_ux_checklist.md)
+
+---
+
+### 2. Layering (Bring to Front)
+- **Priority**: 🔴 Critical (Mobile UX Checklist Item #8)
+- **Status**: ⏸️ **NEXT**
+- **Source**: [Mobile UX Checklist](../../mobile_ux_checklist.md) - Item #8
+
+**Task**: A dedicated "Bring to Front" button or icon is visible in the control panel when selected.
+
+**Expected Behavior**: 
+- Moves object to top of stack
+- Essential for stacking multiple objects
+
+**Implementation**:
+- **Task 1**: Add "Bring to Front" button to control panel
+  - Display when text object is selected
+  - Icon or button in toolbar
+- **Task 2**: Implement layer reordering
+  - Update object z-index or array order
+  - Move selected object to end of objects array (top layer)
+  - Update canvas to reflect new order
+
+**Files to Modify**: 
+- `src/App.tsx` (add button to toolbar)
+- `src/state/editorStore.ts` (add bringToFront action)
+- `src/components/containers/EditorCanvasContainer.tsx` (update canvas order)
+
+**Reference**: See [Mobile UX Checklist](../../mobile_ux_checklist.md)
+
+---
+
+### 3. Font Scaling Display
+- **Priority**: 🔴 Critical (Mobile UX Checklist Item #9)
+- **Status**: ⏸️ **NEXT**
+- **Source**: [Mobile UX Checklist](../../mobile_ux_checklist.md) - Item #9
+
+**Task**: Scale via pinch/handles.
+
+**Expected Behavior**: 
+- The corresponding Font Size Slider value in the controls panel updates in real-time
+- Bridges the gap between touch input and numerical input
+
+**Implementation**:
+- **Task 1**: Calculate font size from scale
+  - When object is scaled via pinch/handles, calculate equivalent font size
+  - Formula: `fontSize = baseFontSize * scaleX` (or average of scaleX/scaleY)
+- **Task 2**: Update slider in real-time
+  - Sync slider value with calculated font size
+  - Update as user scales object
+  - Ensure slider reflects current scale
+
+**Files to Modify**: 
+- `src/components/containers/EditorCanvasContainer.tsx` (calculate font size from scale)
+- `src/App.tsx` (update slider value)
+- `src/state/editorStore.ts` (sync fontSize with scale)
+
+**Reference**: See [Mobile UX Checklist](../../mobile_ux_checklist.md)
+
+---
+
+## 🔴 CRITICAL PRIORITY (Deferred Until Mobile UX Checklist Complete)
+
+### 4. Complete UI Controls
 - **Priority**: 🔴 Critical
 - **Status**: ❌ Not Implemented
 - **Current State**: Icons exist in UI but no functionality connected
@@ -46,7 +191,7 @@ These are high-priority features that should be implemented next. They represent
 
 ---
 
-### 2. Add Testing Infrastructure
+### 5. Add Testing Infrastructure
 - **Priority**: 🔴 Critical
 - **Status**: ❌ Not Implemented
 - **Current State**: No automated tests exist
@@ -85,7 +230,7 @@ These are high-priority features that should be implemented next. They represent
 
 ---
 
-### 3. Replace Alert() with Toast System
+### 6. Replace Alert() with Toast System
 - **Priority**: 🔴 Critical
 - **Status**: ❌ Not Implemented
 - **Current State**: Using `alert()` for errors (not user-friendly)
@@ -119,7 +264,7 @@ These are high-priority features that should be implemented next. They represent
 
 ---
 
-### 4. Remove Console.log Statements
+### 7. Remove Console.log Statements
 - **Priority**: 🔴 Critical
 - **Status**: ❌ Not Implemented
 - **Current State**: Multiple `console.log()` statements in production code
@@ -147,9 +292,9 @@ These are high-priority features that should be implemented next. They represent
 
 ---
 
-## 🟠 HIGH PRIORITY (Essential Features)
+## 🟠 HIGH PRIORITY (Deferred Until Mobile UX Checklist Complete)
 
-### 5. Mobile UX - Virtual Keyboard Handling
+### 8. Mobile UX - Virtual Keyboard Handling
 - **Priority**: 🟠 High
 - **Status**: ❌ Not Implemented
 - **Current State**: Canvas may resize/shift when mobile keyboard opens
@@ -173,7 +318,7 @@ These are high-priority features that should be implemented next. They represent
 
 ---
 
-### 6. Mobile UX - Safe Area Management
+### 9. Mobile UX - Safe Area Management
 - **Priority**: 🟠 High
 - **Status**: ❌ Not Implemented
 - **Current State**: UI may overlap with notches/home indicator
@@ -195,7 +340,7 @@ These are high-priority features that should be implemented next. They represent
 
 ---
 
-### 7. Improve TypeScript Types
+### 10. Improve TypeScript Types
 - **Priority**: 🟠 High
 - **Status**: ❌ Not Implemented
 - **Current State**: Some `any` types in codebase
@@ -221,7 +366,60 @@ These are high-priority features that should be implemented next. They represent
 
 ---
 
-### 8. Extract Magic Numbers to Constants
+### 11. Extract Magic Numbers to Constants
+
+---
+
+## 🟠 HIGH PRIORITY (Feature Enhancements)
+
+### 12. Background Image Manipulation
+- **Priority**: 🟠 High
+- **Status**: ❌ Not Implemented
+- **Current State**: Background image is static, cannot be moved, scaled, or rotated
+
+**Problem**: 
+- Users can only manipulate text objects
+- Background image cannot be repositioned, resized, or rotated
+- Limits creative control and composition options
+
+**Expected Behavior**: 
+- Background image should be selectable and manipulable like text objects
+- Users can move, scale, and rotate the background image
+- Background image should have selection handles when selected
+- Should work with same gesture controls (drag, pinch, rotate)
+
+**Implementation**:
+- **Task 1**: Make background image selectable
+  - Add background image as a Fabric.js object (FabricImage)
+  - Enable selection on background image
+  - Add selection handles when background is selected
+- **Task 2**: Implement manipulation controls
+  - Enable drag to move background
+  - Enable resize handles to scale background
+  - Enable rotation handle to rotate background
+  - Sync with Zustand store for state management
+- **Task 3**: Update state management
+  - Add background image transform properties to store (x, y, scaleX, scaleY, rotation)
+  - Update `baseImage` interface to include transform properties
+  - Persist background position/scale/rotation
+- **Task 4**: Handle edge cases
+  - Prevent background from being deleted
+  - Ensure background stays behind all text objects (z-index)
+  - Handle canvas resize with background transforms
+  - Maintain aspect ratio option (optional)
+
+**Files to Modify**: 
+- `src/components/containers/EditorCanvasContainer.tsx` (make background selectable, add manipulation)
+- `src/state/editorStore.ts` (add background transform properties)
+- `src/App.tsx` (may need UI indicator when background is selected)
+
+**Considerations**:
+- Background should always be behind text objects (z-index)
+- May want to disable deletion for background
+- Consider adding "Reset Background" button to restore original position/scale
+- May want to add "Fit to Canvas" option
+
+**Reference**: Similar to text object manipulation, but for background image
 - **Priority**: 🟠 High
 - **Status**: ❌ Not Implemented
 - **Current State**: Magic numbers scattered in code
@@ -251,14 +449,24 @@ These are high-priority features that should be implemented next. They represent
 
 ## 📋 Implementation Priority Order
 
-1. **Complete UI Controls** - Users expect these to work
-2. **Add Testing Infrastructure** - Critical for code quality
-3. **Replace Alert() with Toast System** - Essential UX improvement
-4. **Remove Console.log Statements** - Quick cleanup
-5. **Mobile UX - Virtual Keyboard Handling** - Essential for mobile
-6. **Mobile UX - Safe Area Management** - Essential for mobile
-7. **Improve TypeScript Types** - Code quality
-8. **Extract Magic Numbers** - Code maintainability
+### 🔴 CRITICAL (Do First)
+0. **Fix Mobile Browser Layout** - 🚧 Currently working on - Blocking issue
+
+### 🎯 CURRENT FOCUS: Mobile UX Checklist (Items 1-3)
+1. **Deletion (Drag-to-Delete Zone)** - Next after layout fix
+2. **Layering (Bring to Front)** - Next
+3. **Font Scaling Display** - Next
+
+### ⏸️ DEFERRED (After Critical Bug & Mobile UX Checklist Complete)
+4. **Complete UI Controls** - Users expect these to work
+5. **Add Testing Infrastructure** - Critical for code quality
+6. **Replace Alert() with Toast System** - Essential UX improvement
+7. **Remove Console.log Statements** - Quick cleanup
+8. **Background Image Manipulation** - Feature enhancement
+9. **Mobile UX - Virtual Keyboard Handling** - Essential for mobile
+10. **Mobile UX - Safe Area Management** - Essential for mobile
+11. **Improve TypeScript Types** - Code quality
+12. **Extract Magic Numbers** - Code maintainability
 
 ---
 

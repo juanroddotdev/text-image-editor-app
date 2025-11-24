@@ -179,6 +179,37 @@ This document lists all completed feature implementations across core functional
 
 ---
 
+## 🐛 BUG FIXES - Complete
+
+### Mobile Browser Layout Fix
+- **Status**: ✅ **COMPLETE**
+- **Priority**: 🔴 Critical Bug
+- **Completion Date**: 2025-11-23
+
+**Problem**: 
+- Bottom toolbar was hidden on mobile browser load
+- User had to scroll to access controls
+- Container was using `100dvh` (862px) instead of actual viewport height (734px)
+
+**Solution**:
+- Implemented JavaScript-based viewport height calculation
+- Set CSS custom property `--vh` to `window.innerHeight` on mount and resize
+- Updated containers to use `var(--vh, 100vh)` instead of `100dvh`
+- Added event listeners for resize and orientation change
+- Prevents scrolling with `overflow: hidden` on html/body
+
+**Files Modified**: 
+- `src/App.tsx` (viewport height calculation, event listeners)
+- `src/index.css` (CSS variable usage, overflow settings)
+- `index.html` (viewport meta tag enhancements)
+
+**Testing**: 
+- ✅ Verified on mobile browsers (iOS Safari, Chrome Android)
+- ✅ Toolbar now visible immediately after image upload
+- ✅ No scrolling required to access controls
+
+---
+
 ## ✅ Feature Completion Summary
 
 **Core Features Completed**: 8/12 (67%)

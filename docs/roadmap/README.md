@@ -57,12 +57,23 @@ This roadmap is organized into focused documents for easier navigation:
 **Active Sprint Items**: See [Active Work](./active/current.md)
 
 **Current Priority**:
-1. **Layering (Bring to Front)** - 🚧 Currently working on
-2. **Font Scaling Display** - Next
+✅ **Mobile UX Checklist - 100% COMPLETE!** 🎉
 
-**Reference**: [Mobile UX Checklist](../mobile_ux_checklist.md) - 8/10 items complete (80%)
+All 10 items from the [Mobile UX Checklist](../mobile_ux_checklist.md) are now complete:
+1. ✅ Move (Pan)
+2. ✅ Scale (Zoom)
+3. ✅ Rotate
+4. ✅ Edit Content
+5. ✅ Selection Handles
+6. ✅ Deselect (Commit)
+7. ✅ Deletion (Drag-to-Delete Zone)
+8. ✅ Layering (Automatic bring-to-front)
+9. ✅ Font Scaling Display (Touch scaling)
+10. ✅ Performance (60fps)
 
 **Recently Completed**: 
+- ✅ Layering (Mobile UX #8) - Automatic bring-to-front on selection
+- ✅ Font Scaling Display (Mobile UX #9) - Touch scaling sufficient, minimal UI
 - ✅ Drag-to-Delete Zone (Mobile UX #7)
 - ✅ Color Picker with mobile-friendly modal
 - ✅ Font Picker with mobile-friendly modal

@@ -10,6 +10,128 @@ import { exportImageWeb, generateExportFilename } from './data-access/imageExpor
 import { theme } from './styles/theme';
 import type { CanvasObject } from './core-logic/canvasUtils';
 
+// Grid Picker Modal Component with swipe-to-close
+interface GridPickerModalProps {
+  currentGridType: 'none' | 'rule-of-thirds' | 'grid-4x4' | 'center-lines' | 'golden-ratio' | 'diagonal';
+  onGridChange: (type: 'none' | 'rule-of-thirds' | 'grid-4x4' | 'center-lines' | 'golden-ratio' | 'diagonal') => void;
+  onClose: () => void;
+}
+
+const GridPickerModal: React.FC<GridPickerModalProps> = ({ currentGridType, onGridChange, onClose }) => {
+  const modalRef = useRef<HTMLDivElement>(null);
+  const [touchStartY, setTouchStartY] = useState<number | null>(null);
+  const [dragOffset, setDragOffset] = useState(0);
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    setTouchStartY(e.touches[0].clientY);
+    setDragOffset(0);
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (touchStartY === null) return;
+    
+    const currentY = e.touches[0].clientY;
+    const diff = currentY - touchStartY;
+    
+    // Only allow dragging down (positive diff)
+    if (diff > 0) {
+      setDragOffset(diff);
+    }
+  };
+
+  const handleTouchEnd = () => {
+    // If dragged down more than 100px, close the modal
+    if (dragOffset > 100) {
+      onClose();
+    }
+    setDragOffset(0);
+    setTouchStartY(null);
+  };
+
+  const gridOptions = [
+    { type: 'none' as const, label: 'None', icon: '✕' },
+    { type: 'rule-of-thirds' as const, label: 'Rule of Thirds', icon: '⊞' },
+    { type: 'grid-4x4' as const, label: '4×4 Grid', icon: '⊞' },
+    { type: 'center-lines' as const, label: 'Center Lines', icon: '➕' },
+    { type: 'golden-ratio' as const, label: 'Golden Ratio', icon: 'Φ' },
+    { type: 'diagonal' as const, label: 'Diagonal', icon: '╲' },
+  ];
+
+  return (
+    <div 
+      className="fixed inset-0 z-50 flex items-end"
+      onClick={onClose}
+    >
+      {/* Backdrop - Lighter for better visibility */}
+      <div className="absolute inset-0 bg-black/20" />
+      
+      {/* Modal Content - Semi-transparent */}
+      <div 
+        ref={modalRef}
+        className="relative w-full rounded-t-3xl shadow-2xl p-6 max-h-[60vh] overflow-y-auto"
+        style={{
+          background: 'rgba(255, 255, 255, 0.85)',
+          backdropFilter: 'blur(20px) saturate(180%)',
+          WebkitBackdropFilter: 'blur(20px) saturate(180%)',
+          transform: `translateY(${dragOffset}px)`,
+          transition: dragOffset === 0 ? 'transform 0.2s ease-out' : 'none',
+        }}
+        onClick={(e) => e.stopPropagation()}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+      >
+        <div className="flex items-center justify-between mb-6">
+          <h3 className="text-xl font-semibold text-neutral-800">Choose Grid</h3>
+          <button
+            onClick={onClose}
+            className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-neutral-100"
+          >
+            <svg className="w-5 h-5 text-neutral-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+
+        {/* Drag indicator */}
+        <div className="flex justify-center mb-4">
+          <div className="w-12 h-1 bg-neutral-300 rounded-full" />
+        </div>
+
+        {/* Grid Options */}
+        <div className="space-y-3">
+          {gridOptions.map((option) => (
+            <button
+              key={option.type}
+              onClick={() => {
+                onGridChange(option.type);
+                // Don't close - let user preview and close manually
+              }}
+              className={`w-full flex items-center justify-between p-4 rounded-xl transition-all ${
+                currentGridType === option.type
+                  ? 'bg-cyan-100 border-2 border-cyan-400'
+                  : 'bg-white border-2 border-neutral-200 hover:border-neutral-300'
+              }`}
+            >
+              <div className="flex items-center gap-4">
+                <span className="text-2xl">{option.icon}</span>
+                <span className={`font-medium ${currentGridType === option.type ? 'text-cyan-700' : 'text-neutral-700'}`}>
+                  {option.label}
+                </span>
+              </div>
+              {currentGridType === option.type && (
+                <svg className="w-5 h-5 text-cyan-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+              )}
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+};
+
 // Color Picker Modal Component with swipe-to-close
 interface ColorPickerModalProps {
   activeObject: CanvasObject;
@@ -241,7 +363,8 @@ function App() {
   const [touchStartX, setTouchStartX] = useState<number | null>(null);
   const [showColorPicker, setShowColorPicker] = useState(false);
   const [showFontPicker, setShowFontPicker] = useState(false);
-  const { baseImage, setBaseImage, addTextObject, objects, activeObjectId, isDeleteZoneActive, updateObject } = useEditorStore();
+  const [showGridPicker, setShowGridPicker] = useState(false);
+  const { baseImage, setBaseImage, addTextObject, objects, activeObjectId, isDeleteZoneActive, updateObject, gridType, setGridType } = useEditorStore();
 
   // Set container height to actual viewport height (fixes mobile browser issue)
   // This ensures the layout uses window.innerHeight instead of 100dvh which can be incorrect on mobile
@@ -403,11 +526,11 @@ function App() {
           {baseImage && <EditorCanvasContainer />}
         </div>
 
-        {/* Top Right - Download Button */}
+        {/* Bottom Right - Download Button */}
         {baseImage && (
           <button
             onClick={handleExport}
-            className="absolute top-4 right-4 w-12 h-12 flex items-center justify-center bg-white/10 backdrop-blur-md hover:bg-white/20 border border-white/20 rounded-full transition-all shadow-lg z-20"
+            className="absolute bottom-4 right-4 w-12 h-12 flex items-center justify-center bg-white/10 backdrop-blur-md hover:bg-white/20 border border-white/20 rounded-full transition-all shadow-lg z-20"
             aria-label="Download image"
           >
             <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -419,11 +542,12 @@ function App() {
         {/* Right Edge Control Panel - Floating Buttons (Instagram-style) - Only show when image is loaded */}
         {baseImage && (
           <div 
-            className={`absolute right-0 top-0 bottom-0 flex flex-col items-center justify-center gap-4 transition-all duration-300 z-20 ${
+            className={`absolute right-0 top-0 flex flex-col items-center gap-4 transition-all duration-300 z-20 ${
               isPanelCollapsed ? 'translate-x-full opacity-0' : 'translate-x-0 opacity-100'
             }`}
             style={{
-              paddingRight: '8px', // Small padding from edge
+              paddingRight: '16px', // Match right-4 (16px) for alignment with download button
+              paddingTop: '16px', // Match top-4 (16px) to start at top
             }}
           >
           {/* Add Text Button - Always visible (I-Beam cursor icon) */}
@@ -443,6 +567,24 @@ function App() {
               <path strokeLinecap="round" d="M12 2v20" />
               <path strokeLinecap="round" d="M8 2h8" />
               <path strokeLinecap="round" d="M8 22h8" />
+            </svg>
+          </button>
+
+          {/* Grid Picker Button */}
+          <button 
+            onClick={() => setShowGridPicker(true)}
+            className="w-12 h-12 flex items-center justify-center rounded-full transition-all shadow-lg"
+            style={{
+              background: gridType !== 'none' ? 'rgba(0, 217, 255, 0.4)' : 'rgba(255, 255, 255, 0.25)',
+              backdropFilter: 'blur(20px) saturate(180%)',
+              WebkitBackdropFilter: 'blur(20px) saturate(180%)',
+              border: gridType !== 'none' ? '1px solid rgba(0, 217, 255, 0.6)' : '1px solid rgba(255, 255, 255, 0.3)',
+            }}
+            aria-label="Grid overlay"
+          >
+            <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              {/* Grid icon - 3x3 grid */}
+              <path strokeLinecap="round" strokeLinejoin="round" d="M3 8h18M3 12h18M3 16h18M8 3v18M12 3v18M16 3v18" />
             </svg>
           </button>
 
@@ -483,20 +625,6 @@ function App() {
                 </svg>
               </button>
 
-              {/* Font Size Display (read-only, shows current size) */}
-              <div 
-                className="w-12 h-12 flex items-center justify-center rounded-full shadow-lg"
-                style={{
-                  background: 'rgba(255, 255, 255, 0.15)',
-                  backdropFilter: 'blur(20px) saturate(180%)',
-                  WebkitBackdropFilter: 'blur(20px) saturate(180%)',
-                  border: '1px solid rgba(255, 255, 255, 0.3)',
-                }}
-              >
-                <span className="text-white/90 text-xs font-semibold">
-                  {objects.find(obj => obj.id === activeObjectId)?.fontSize || 48}
-                </span>
-              </div>
             </>
           )}
           </div>
@@ -505,7 +633,7 @@ function App() {
         {/* Handwritten "Select Image" with Arrow - Only show when no image */}
         {!baseImage && (
           <div 
-            className="absolute bottom-24 left-1/2 flex flex-col items-center z-20 bounce-subtle"
+            className="absolute bottom-32 left-1/2 flex flex-col items-center z-20 bounce-subtle"
             style={{
               transform: 'translateX(-50%)',
             }}
@@ -579,18 +707,32 @@ function App() {
           </div>
         )}
 
-        {/* Bottom Center - Add Image Button */}
+        {/* Add Image Button - Centered on initial load, animates to bottom-left after image selected */}
         <button
           onClick={handleUploadClick}
-          className="absolute bottom-6 left-1/2 transform -translate-x-1/2 w-14 h-14 flex items-center justify-center bg-white/10 backdrop-blur-md hover:bg-white/20 border border-white/20 rounded-full transition-all shadow-lg z-20"
+          className="absolute flex items-center justify-center bg-white/10 backdrop-blur-md hover:bg-white/20 border border-white/20 rounded-full shadow-lg z-20 transition-all duration-500 ease-in-out"
           style={{
-            opacity: baseImage ? 0.7 : 1, // Adjust opacity when image is loaded
+            bottom: '16px', // bottom-4 (16px)
+            // Animate from center to left when image is loaded
+            left: baseImage ? '16px' : '50%', // left-4 when image loaded, center when not
+            transform: baseImage ? 'translateX(0)' : 'translateX(-50%)',
+            width: baseImage ? '48px' : '64px', // w-12 (48px) when image loaded, w-16 (64px) when not
+            height: baseImage ? '48px' : '64px',
             // Hide when delete zone is active to avoid overlap
             visibility: isDeleteZoneActive ? 'hidden' : 'visible',
           }}
           aria-label={baseImage ? "Change image" : "Upload image"}
         >
-          <svg className="w-7 h-7 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <svg 
+            className="text-white transition-all duration-500" 
+            fill="none" 
+            viewBox="0 0 24 24" 
+            stroke="currentColor"
+            style={{
+              width: baseImage ? '24px' : '32px',
+              height: baseImage ? '24px' : '32px',
+            }}
+          >
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
           </svg>
         </button>
@@ -610,6 +752,18 @@ function App() {
             activeObject={activeObject}
             onFontChange={handleFontChange}
             onClose={() => setShowFontPicker(false)}
+          />
+        )}
+
+        {/* Grid Picker Modal */}
+        {showGridPicker && (
+          <GridPickerModal
+            currentGridType={gridType}
+            onGridChange={(type) => {
+              setGridType(type);
+              // Don't close - let user preview and close manually
+            }}
+            onClose={() => setShowGridPicker(false)}
           />
         )}
       </div>

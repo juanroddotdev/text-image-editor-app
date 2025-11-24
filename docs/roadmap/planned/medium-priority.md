@@ -31,6 +31,11 @@ These are medium-priority features that enhance the application but are not crit
   - Test with screen readers (VoiceOver, NVDA)
   - Add semantic HTML where needed
   - Ensure focus management
+- **Task 4**: Manual font size input (accessibility)
+  - Add manual font size input field/slider for users who cannot use touch scaling
+  - Provides precise control and accessibility for users with motor impairments
+  - Consider number input with +/- buttons or slider control
+  - Display current font size value (read-only or editable)
 
 **Files to Modify**: 
 - `src/App.tsx`

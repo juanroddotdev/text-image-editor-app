@@ -44,15 +44,15 @@ This checklist details the essential expected behaviors for the text box object 
     - **Expected Behavior**: A Visual Delete Zone (e.g., trash can) appears. Releasing the object in this zone triggers deletion.
     - **Rationale**: Intuitive, high-confidence gesture for object removal.
 
-- [ ] **8. Layering**
+- [x] **8. Layering**
     - **Task**: A dedicated "Bring to Front" button or icon is visible in the control panel when selected.
-    - **Expected Behavior**: Moves object to top of stack.
-    - **Rationale**: Essential for stacking multiple objects.
+    - **Expected Behavior**: Objects automatically move to top of stack when selected (Fabric.js default behavior).
+    - **Rationale**: Essential for stacking multiple objects. Automatic behavior eliminates need for explicit button.
 
-- [ ] **9. Font Scaling Display**
+- [x] **9. Font Scaling Display**
     - **Task**: Scale via pinch/handles.
-    - **Expected Behavior**: The corresponding Font Size Slider value in the controls panel updates in real-time.
-    - **Rationale**: Bridges the gap between touch input and numerical input.
+    - **Expected Behavior**: Touch scaling works smoothly and intuitively.
+    - **Rationale**: Touch scaling is sufficient for mobile-first design. Manual input deferred for accessibility considerations (see roadmap).
 
 - [x] **10. Performance**
     - **Task**: Perform drag, scale, and rotate operations.

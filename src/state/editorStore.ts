@@ -28,6 +28,9 @@ interface EditorState {
   // Delete zone state
   isDeleteZoneActive: boolean;
 
+  // Grid overlay state
+  gridType: 'none' | 'rule-of-thirds' | 'grid-4x4' | 'center-lines' | 'golden-ratio' | 'diagonal';
+
   // Actions
   setBaseImage: (image: BaseImage) => void;
   setCanvasDimensions: (width: number, height: number) => void;
@@ -36,6 +39,7 @@ interface EditorState {
   deleteObject: (id: string) => void;
   setActiveObject: (id: string | null) => void;
   setDeleteZoneActive: (active: boolean) => void;
+  setGridType: (type: 'none' | 'rule-of-thirds' | 'grid-4x4' | 'center-lines' | 'golden-ratio' | 'diagonal') => void;
   clearCanvas: () => void;
 }
 
@@ -47,6 +51,7 @@ export const useEditorStore = create<EditorState>((set, get) => ({
   objects: [],
   activeObjectId: null,
   isDeleteZoneActive: false,
+  gridType: 'none',
 
   // Actions
   setBaseImage: (image) => {
@@ -118,6 +123,9 @@ export const useEditorStore = create<EditorState>((set, get) => ({
     set({ isDeleteZoneActive: active });
   },
 
+  setGridType: (type) => {
+    set({ gridType: type });
+  },
 
   clearCanvas: () => {
     set({
@@ -127,6 +135,7 @@ export const useEditorStore = create<EditorState>((set, get) => ({
       canvasWidth: 800,
       canvasHeight: 600,
       isDeleteZoneActive: false,
+      gridType: 'none',
     });
   },
 }));

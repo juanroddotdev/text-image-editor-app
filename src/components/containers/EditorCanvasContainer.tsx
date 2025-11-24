@@ -12,6 +12,7 @@ export const EditorCanvasContainer: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const fabricCanvasRef = useRef<Canvas | null>(null);
   const newlyCreatedTextIdRef = useRef<string | null>(null);
+  const gridTypeRef = useRef<'none' | 'rule-of-thirds' | 'grid-4x4' | 'center-lines' | 'golden-ratio' | 'diagonal'>('none');
 
   // Custom Gesture State
   const gestureState = useRef({
@@ -38,6 +39,7 @@ export const EditorCanvasContainer: React.FC = () => {
     updateObject,
     deleteObject,
     setDeleteZoneActive,
+    gridType,
   } = useEditorStore();
 
   // Initialize Fabric.js canvas
@@ -72,6 +74,150 @@ export const EditorCanvasContainer: React.FC = () => {
 
     canvas.on('selection:cleared', () => {
       setActiveObject(null);
+    });
+
+    // Grid overlay rendering
+    const drawGrid = () => {
+      // Use ref to get current value (not closure value)
+      const currentGridType = gridTypeRef.current;
+      if (currentGridType === 'none') return;
+      
+      const ctx = canvas.getContext();
+      if (!ctx) return;
+
+      const width = canvas.getWidth();
+      const height = canvas.getHeight();
+
+      ctx.save();
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.6)'; // Semi-transparent white
+      ctx.lineWidth = 1.5;
+      ctx.setLineDash([4, 4]); // Dashed lines
+
+      switch (currentGridType) {
+        case 'rule-of-thirds': {
+          // Rule of Thirds / 3x3 Grid
+          const thirdWidth = width / 3;
+          const thirdHeight = height / 3;
+          
+          // Vertical lines
+          ctx.beginPath();
+          ctx.moveTo(thirdWidth, 0);
+          ctx.lineTo(thirdWidth, height);
+          ctx.stroke();
+          
+          ctx.beginPath();
+          ctx.moveTo(thirdWidth * 2, 0);
+          ctx.lineTo(thirdWidth * 2, height);
+          ctx.stroke();
+          
+          // Horizontal lines
+          ctx.beginPath();
+          ctx.moveTo(0, thirdHeight);
+          ctx.lineTo(width, thirdHeight);
+          ctx.stroke();
+          
+          ctx.beginPath();
+          ctx.moveTo(0, thirdHeight * 2);
+          ctx.lineTo(width, thirdHeight * 2);
+          ctx.stroke();
+          break;
+        }
+        
+        case 'grid-4x4': {
+          // 4x4 Grid
+          const quarterWidth = width / 4;
+          const quarterHeight = height / 4;
+          
+          // Vertical lines
+          for (let i = 1; i < 4; i++) {
+            ctx.beginPath();
+            ctx.moveTo(quarterWidth * i, 0);
+            ctx.lineTo(quarterWidth * i, height);
+            ctx.stroke();
+          }
+          
+          // Horizontal lines
+          for (let i = 1; i < 4; i++) {
+            ctx.beginPath();
+            ctx.moveTo(0, quarterHeight * i);
+            ctx.lineTo(width, quarterHeight * i);
+            ctx.stroke();
+          }
+          break;
+        }
+        
+        case 'center-lines': {
+          // Center lines (crosshair)
+          const centerX = width / 2;
+          const centerY = height / 2;
+          
+          // Vertical center line
+          ctx.beginPath();
+          ctx.moveTo(centerX, 0);
+          ctx.lineTo(centerX, height);
+          ctx.stroke();
+          
+          // Horizontal center line
+          ctx.beginPath();
+          ctx.moveTo(0, centerY);
+          ctx.lineTo(width, centerY);
+          ctx.stroke();
+          break;
+        }
+        
+        case 'golden-ratio': {
+          // Golden ratio (φ = 1.618)
+          const phi = 1.618;
+          const goldenWidth = width / phi;
+          const goldenHeight = height / phi;
+          
+          // Vertical lines at golden ratio points
+          ctx.beginPath();
+          ctx.moveTo(goldenWidth, 0);
+          ctx.lineTo(goldenWidth, height);
+          ctx.stroke();
+          
+          ctx.beginPath();
+          ctx.moveTo(width - goldenWidth, 0);
+          ctx.lineTo(width - goldenWidth, height);
+          ctx.stroke();
+          
+          // Horizontal lines at golden ratio points
+          ctx.beginPath();
+          ctx.moveTo(0, goldenHeight);
+          ctx.lineTo(width, goldenHeight);
+          ctx.stroke();
+          
+          ctx.beginPath();
+          ctx.moveTo(0, height - goldenHeight);
+          ctx.lineTo(width, height - goldenHeight);
+          ctx.stroke();
+          break;
+        }
+        
+        case 'diagonal': {
+          // Diagonal guides (corner to corner)
+          // Top-left to bottom-right
+          ctx.beginPath();
+          ctx.moveTo(0, 0);
+          ctx.lineTo(width, height);
+          ctx.stroke();
+          
+          // Top-right to bottom-left
+          ctx.beginPath();
+          ctx.moveTo(width, 0);
+          ctx.lineTo(0, height);
+          ctx.stroke();
+          break;
+        }
+      }
+
+      ctx.restore();
+    };
+
+    // Draw grid after canvas renders
+    canvas.on('after:render', () => {
+      drawGrid();
     });
 
     // Delete zone threshold (distance from bottom in pixels)
@@ -470,7 +616,15 @@ export const EditorCanvasContainer: React.FC = () => {
     applySelectionStyle(canvas);
 
     canvas.requestRenderAll();
-  }, [objects]);
+  }, [objects, gridType]);
+
+  // Update ref and re-render canvas when grid type changes
+  useEffect(() => {
+    gridTypeRef.current = gridType;
+    console.log('📐 Grid type changed:', gridType);
+    if (!fabricCanvasRef.current) return;
+    fabricCanvasRef.current.requestRenderAll();
+  }, [gridType]);
 
   return (
     <div className="w-full h-full flex items-center justify-center bg-neutral-200 overflow-hidden" style={{ touchAction: 'none' }}>

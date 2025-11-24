@@ -74,8 +74,8 @@ export const useEditorStore = create<EditorState>((set, get) => ({
     const newObject: CanvasObject = {
       id: generateObjectId(),
       type: 'text',
-      x: canvasWidth / 2,
-      y: canvasHeight / 2,
+      x: canvasWidth / 2, // Horizontally centered
+      y: canvasHeight * 0.35, // 65% from bottom (35% from top)
       width: 200,
       height: 50,
       rotation: 0,

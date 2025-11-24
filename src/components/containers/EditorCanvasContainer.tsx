@@ -11,6 +11,7 @@ import { applySelectionStyle } from '../../config/canvasConfig';
 export const EditorCanvasContainer: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const fabricCanvasRef = useRef<Canvas | null>(null);
+  const newlyCreatedTextIdRef = useRef<string | null>(null);
 
   // Custom Gesture State
   const gestureState = useRef({
@@ -369,6 +370,31 @@ export const EditorCanvasContainer: React.FC = () => {
           });
 
           canvas.add(text);
+          
+          // Center the text horizontally after it's created
+          // Calculate centered position: centerX - (textWidth / 2)
+          canvas.renderAll(); // Render first to get accurate measurements
+          const textWidth = text.getScaledWidth();
+          const centeredX = (canvasWidth / 2) - (textWidth / 2);
+          
+          // Update text position to be centered
+          text.set('left', centeredX);
+          text.setCoords();
+          
+          // Update store with centered position
+          updateObject(storeObj.id, { x: centeredX });
+          
+          // Mark as newly created and auto-enter editing mode (opens keyboard immediately)
+          newlyCreatedTextIdRef.current = storeObj.id;
+          
+          // Use setTimeout to ensure canvas has rendered before entering edit mode
+          setTimeout(() => {
+            if (newlyCreatedTextIdRef.current === storeObj.id) {
+              canvas.setActiveObject(text);
+              text.enterEditing();
+              newlyCreatedTextIdRef.current = null; // Clear after entering edit mode
+            }
+          }, 100);
         }
       }
     });

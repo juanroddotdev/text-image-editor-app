@@ -7,12 +7,241 @@ import { useEditorStore } from './state/editorStore';
 import { EditorCanvasContainer, getCanvasDataURL } from './components/containers/EditorCanvasContainer';
 import { loadImageAsset, isValidImageFile } from './data-access/imageLoader';
 import { exportImageWeb, generateExportFilename } from './data-access/imageExporter';
+import { theme } from './styles/theme';
+import type { CanvasObject } from './core-logic/canvasUtils';
+
+// Color Picker Modal Component with swipe-to-close
+interface ColorPickerModalProps {
+  activeObject: CanvasObject;
+  onColorChange: (color: string) => void;
+  onClose: () => void;
+}
+
+const ColorPickerModal: React.FC<ColorPickerModalProps> = ({ activeObject, onColorChange, onClose }) => {
+  const modalRef = useRef<HTMLDivElement>(null);
+  const [touchStartY, setTouchStartY] = useState<number | null>(null);
+  const [dragOffset, setDragOffset] = useState(0);
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    setTouchStartY(e.touches[0].clientY);
+    setDragOffset(0);
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (touchStartY === null) return;
+    
+    const currentY = e.touches[0].clientY;
+    const diff = currentY - touchStartY;
+    
+    // Only allow dragging down (positive diff)
+    if (diff > 0) {
+      setDragOffset(diff);
+    }
+  };
+
+  const handleTouchEnd = () => {
+    // If dragged down more than 100px, close the modal
+    if (dragOffset > 100) {
+      onClose();
+    }
+    setDragOffset(0);
+    setTouchStartY(null);
+  };
+
+  return (
+    <div 
+      className="fixed inset-0 z-50 flex items-end"
+      onClick={onClose}
+    >
+      {/* Backdrop - Lighter for better visibility */}
+      <div className="absolute inset-0 bg-black/20" />
+      
+      {/* Modal Content - Semi-transparent */}
+      <div 
+        ref={modalRef}
+        className="relative w-full rounded-t-3xl shadow-2xl p-6 max-h-[60vh] overflow-y-auto"
+        style={{
+          background: 'rgba(255, 255, 255, 0.85)',
+          backdropFilter: 'blur(20px) saturate(180%)',
+          WebkitBackdropFilter: 'blur(20px) saturate(180%)',
+          transform: `translateY(${dragOffset}px)`,
+          transition: dragOffset === 0 ? 'transform 0.2s ease-out' : 'none',
+        }}
+        onClick={(e) => e.stopPropagation()}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+      >
+        <div className="flex items-center justify-between mb-6">
+          <h3 className="text-xl font-semibold text-neutral-800">Choose Color</h3>
+          <button
+            onClick={onClose}
+            className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-neutral-100"
+          >
+            <svg className="w-5 h-5 text-neutral-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+
+        {/* Drag indicator */}
+        <div className="flex justify-center mb-4">
+          <div className="w-12 h-1 bg-neutral-300 rounded-full" />
+        </div>
+
+        {/* Color Swatches */}
+        <div className="grid grid-cols-6 gap-4 mb-6">
+          {/* Preset Colors */}
+          {Object.entries(theme.colors.text).map(([name, color]) => (
+            <button
+              key={name}
+              onClick={() => onColorChange(color)}
+              className="w-12 h-12 rounded-full border-2 border-neutral-300 hover:scale-110 transition-transform shadow-md"
+              style={{ backgroundColor: color }}
+              aria-label={`Select color ${name}`}
+            />
+          ))}
+        </div>
+
+        {/* Custom Color Picker */}
+        <div className="border-t border-neutral-200 pt-6">
+          <label className="block text-sm font-medium text-neutral-700 mb-3">
+            Custom Color
+          </label>
+          <div className="flex items-center gap-4">
+            <input
+              type="color"
+              value={activeObject.fill || '#000000'}
+              onChange={(e) => onColorChange(e.target.value)}
+              className="w-16 h-16 rounded-lg border-2 border-neutral-300 cursor-pointer"
+            />
+            <div className="flex-1">
+              <input
+                type="text"
+                value={activeObject.fill || '#000000'}
+                onChange={(e) => onColorChange(e.target.value)}
+                className="w-full px-3 py-2 border-2 border-neutral-300 rounded-lg font-mono text-sm"
+                placeholder="#000000"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// Font Picker Modal Component with swipe-to-close
+interface FontPickerModalProps {
+  activeObject: CanvasObject;
+  onFontChange: (fontFamily: string) => void;
+  onClose: () => void;
+}
+
+const FontPickerModal: React.FC<FontPickerModalProps> = ({ activeObject, onFontChange, onClose }) => {
+  const modalRef = useRef<HTMLDivElement>(null);
+  const [touchStartY, setTouchStartY] = useState<number | null>(null);
+  const [dragOffset, setDragOffset] = useState(0);
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    setTouchStartY(e.touches[0].clientY);
+    setDragOffset(0);
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (touchStartY === null) return;
+    
+    const currentY = e.touches[0].clientY;
+    const diff = currentY - touchStartY;
+    
+    // Only allow dragging down (positive diff)
+    if (diff > 0) {
+      setDragOffset(diff);
+    }
+  };
+
+  const handleTouchEnd = () => {
+    // If dragged down more than 100px, close the modal
+    if (dragOffset > 100) {
+      onClose();
+    }
+    setDragOffset(0);
+    setTouchStartY(null);
+  };
+
+  return (
+    <div 
+      className="fixed inset-0 z-50 flex items-end"
+      onClick={onClose}
+    >
+      {/* Backdrop - Lighter for better visibility */}
+      <div className="absolute inset-0 bg-black/20" />
+      
+      {/* Modal Content - Semi-transparent */}
+      <div 
+        ref={modalRef}
+        className="relative w-full rounded-t-3xl shadow-2xl p-6 max-h-[60vh] overflow-y-auto"
+        style={{
+          background: 'rgba(255, 255, 255, 0.85)',
+          backdropFilter: 'blur(20px) saturate(180%)',
+          WebkitBackdropFilter: 'blur(20px) saturate(180%)',
+          transform: `translateY(${dragOffset}px)`,
+          transition: dragOffset === 0 ? 'transform 0.2s ease-out' : 'none',
+        }}
+        onClick={(e) => e.stopPropagation()}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+      >
+        <div className="flex items-center justify-between mb-6">
+          <h3 className="text-xl font-semibold text-neutral-800">Choose Font</h3>
+          <button
+            onClick={onClose}
+            className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-neutral-100"
+          >
+            <svg className="w-5 h-5 text-neutral-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+
+        {/* Drag indicator */}
+        <div className="flex justify-center mb-4">
+          <div className="w-12 h-1 bg-neutral-300 rounded-full" />
+        </div>
+
+        {/* Font List */}
+        <div className="space-y-2">
+          {theme.fonts.families.map((font) => (
+            <button
+              key={font}
+              onClick={() => onFontChange(font)}
+              className={`w-full px-4 py-4 rounded-lg text-left transition-all ${
+                activeObject.fontFamily === font
+                  ? 'bg-primary-100 border-2 border-primary-500'
+                  : 'bg-neutral-50 hover:bg-neutral-100 border-2 border-transparent'
+              }`}
+              style={{ fontFamily: font }}
+            >
+              <div className="text-lg font-medium text-neutral-800">{font}</div>
+              <div className="text-sm text-neutral-500 mt-1" style={{ fontFamily: font }}>
+                The quick brown fox jumps over the lazy dog
+              </div>
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+};
 
 function App() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isPanelCollapsed, setIsPanelCollapsed] = useState(false);
   const [touchStartX, setTouchStartX] = useState<number | null>(null);
-  const { baseImage, setBaseImage, addTextObject, objects, activeObjectId, isDeleteZoneActive } = useEditorStore();
+  const [showColorPicker, setShowColorPicker] = useState(false);
+  const [showFontPicker, setShowFontPicker] = useState(false);
+  const { baseImage, setBaseImage, addTextObject, objects, activeObjectId, isDeleteZoneActive, updateObject } = useEditorStore();
 
   // Set container height to actual viewport height (fixes mobile browser issue)
   // This ensures the layout uses window.innerHeight instead of 100dvh which can be incorrect on mobile
@@ -125,6 +354,25 @@ function App() {
     }
   };
 
+  // Get active object data
+  const activeObject = activeObjectId ? objects.find(obj => obj.id === activeObjectId) : null;
+
+  // Color picker handlers
+  const handleColorChange = (color: string) => {
+    if (activeObjectId) {
+      updateObject(activeObjectId, { fill: color });
+      // Don't close the drawer - let user preview and close manually
+    }
+  };
+
+  // Font picker handlers
+  const handleFontChange = (fontFamily: string) => {
+    if (activeObjectId) {
+      updateObject(activeObjectId, { fontFamily });
+      // Don't close the drawer - let user preview and close manually
+    }
+  };
+
   return (
     <div 
       className="md:p-8 md:flex md:items-start md:justify-center bg-dark-bg overflow-hidden"
@@ -168,16 +416,17 @@ function App() {
           </button>
         )}
 
-        {/* Right Edge Control Panel - Floating Buttons (Instagram-style) */}
-        <div 
-          className={`absolute right-0 top-0 bottom-0 flex flex-col items-center justify-center gap-4 transition-all duration-300 z-20 ${
-            isPanelCollapsed ? 'translate-x-full opacity-0' : 'translate-x-0 opacity-100'
-          }`}
-          style={{
-            paddingRight: '8px', // Small padding from edge
-          }}
-        >
-          {/* Add Text Button - Always visible (Aa icon) */}
+        {/* Right Edge Control Panel - Floating Buttons (Instagram-style) - Only show when image is loaded */}
+        {baseImage && (
+          <div 
+            className={`absolute right-0 top-0 bottom-0 flex flex-col items-center justify-center gap-4 transition-all duration-300 z-20 ${
+              isPanelCollapsed ? 'translate-x-full opacity-0' : 'translate-x-0 opacity-100'
+            }`}
+            style={{
+              paddingRight: '8px', // Small padding from edge
+            }}
+          >
+          {/* Add Text Button - Always visible (I-Beam cursor icon) */}
           <button
             onClick={addTextObject}
             className="w-12 h-12 flex items-center justify-center rounded-full transition-all shadow-lg"
@@ -189,9 +438,12 @@ function App() {
             }}
             aria-label="Add text"
           >
-            <span className="text-white text-lg font-bold" style={{ fontFamily: 'system-ui, -apple-system, sans-serif' }}>
-              Aa
-            </span>
+            <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+              {/* I-Beam cursor icon - vertical line with horizontal caps */}
+              <path strokeLinecap="round" d="M12 2v20" />
+              <path strokeLinecap="round" d="M8 2h8" />
+              <path strokeLinecap="round" d="M8 22h8" />
+            </svg>
           </button>
 
           {/* Text Controls - Only show when text is selected */}
@@ -199,6 +451,7 @@ function App() {
             <>
               {/* Font Family Button */}
               <button 
+                onClick={() => setShowFontPicker(true)}
                 className="w-12 h-12 flex items-center justify-center rounded-full transition-all shadow-lg"
                 style={{
                   background: 'rgba(255, 255, 255, 0.25)',
@@ -208,13 +461,14 @@ function App() {
                 }}
                 aria-label="Font family"
               >
-                <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16m-7 6h7" />
-                </svg>
+                <span className="text-white text-lg font-bold" style={{ fontFamily: 'system-ui, -apple-system, sans-serif' }}>
+                  Aa
+                </span>
               </button>
 
               {/* Color Picker Button */}
               <button 
+                onClick={() => setShowColorPicker(true)}
                 className="w-12 h-12 flex items-center justify-center rounded-full transition-all shadow-lg"
                 style={{
                   background: 'rgba(255, 255, 255, 0.25)',
@@ -245,7 +499,8 @@ function App() {
               </div>
             </>
           )}
-        </div>
+          </div>
+        )}
 
         {/* Handwritten "Select Image" with Arrow - Only show when no image */}
         {!baseImage && (
@@ -339,6 +594,24 @@ function App() {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
           </svg>
         </button>
+
+        {/* Color Picker Modal */}
+        {showColorPicker && activeObject && (
+          <ColorPickerModal
+            activeObject={activeObject}
+            onColorChange={handleColorChange}
+            onClose={() => setShowColorPicker(false)}
+          />
+        )}
+
+        {/* Font Picker Modal */}
+        {showFontPicker && activeObject && (
+          <FontPickerModal
+            activeObject={activeObject}
+            onFontChange={handleFontChange}
+            onClose={() => setShowFontPicker(false)}
+          />
+        )}
       </div>
     </div>
   );

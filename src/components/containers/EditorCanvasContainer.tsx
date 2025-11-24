@@ -135,7 +135,7 @@ export const EditorCanvasContainer: React.FC = () => {
     });
 
     // Also handle mouse:up to catch cases where object might not trigger modified event
-    canvas.on('mouse:up', (opt) => {
+    canvas.on('mouse:up', () => {
       // Check if we were dragging an object near the delete zone
       if (draggedObject && (draggedObject as any).objectId) {
         const obj = draggedObject;

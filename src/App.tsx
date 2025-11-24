@@ -2,7 +2,7 @@
  * Main Application Component
  */
 
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import { useEditorStore } from './state/editorStore';
 import { EditorCanvasContainer, getCanvasDataURL } from './components/containers/EditorCanvasContainer';
 import { loadImageAsset, isValidImageFile } from './data-access/imageLoader';
@@ -10,7 +10,9 @@ import { exportImageWeb, generateExportFilename } from './data-access/imageExpor
 
 function App() {
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const { baseImage, setBaseImage, addTextObject, objects, activeObjectId, updateObject, deleteObject } = useEditorStore();
+  const [isPanelCollapsed, setIsPanelCollapsed] = useState(false);
+  const [touchStartX, setTouchStartX] = useState<number | null>(null);
+  const { baseImage, setBaseImage, addTextObject, objects, activeObjectId } = useEditorStore();
 
   // Set container height to actual viewport height (fixes mobile browser issue)
   // This ensures the layout uses window.innerHeight instead of 100dvh which can be incorrect on mobile
@@ -42,6 +44,41 @@ function App() {
       }
     };
   }, []);
+
+  // Swipe gesture handling for panel - only detect swipes on right edge
+  const handleTouchStart = (e: React.TouchEvent) => {
+    const touchX = e.touches[0].clientX;
+    const screenWidth = window.innerWidth;
+    const rightEdgeThreshold = screenWidth * 0.15; // Right 15% of screen
+    
+    // Only track if touch starts on right edge
+    if (touchX > screenWidth - rightEdgeThreshold) {
+      setTouchStartX(touchX);
+    }
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (touchStartX === null) return;
+    
+    const touchX = e.touches[0].clientX;
+    const diffX = touchStartX - touchX;
+    const threshold = 50; // Minimum swipe distance
+
+    // Swipe left to hide panel (if visible)
+    if (diffX > threshold && !isPanelCollapsed) {
+      setIsPanelCollapsed(true);
+      setTouchStartX(null);
+    }
+    // Swipe right to show panel (if hidden)
+    else if (diffX < -threshold && isPanelCollapsed) {
+      setIsPanelCollapsed(false);
+      setTouchStartX(null);
+    }
+  };
+
+  const handleTouchEnd = () => {
+    setTouchStartX(null);
+  };
 
 
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -108,124 +145,173 @@ function App() {
           className="hidden"
         />
 
-        {baseImage ? (
-          <>
-            {/* Canvas Area - Full Screen */}
-            <div className="flex-1 relative overflow-hidden min-h-0">
-              <EditorCanvasContainer />
-            </div>
+        {/* Canvas Area - Full Screen */}
+        <div 
+          className="flex-1 relative overflow-hidden min-h-0"
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={handleTouchEnd}
+        >
+          {baseImage && <EditorCanvasContainer />}
+        </div>
 
-            {/* Bottom Toolbar Overlay - Fixed at bottom */}
-            <div className="bg-dark-panel/95 backdrop-blur-sm border-t border-white/10 flex-shrink-0">
-              {/* Text Controls Row */}
-              {activeObjectId && (
-                <div className="px-4 py-3 flex items-center justify-between border-b border-white/10">
-                  {/* Left: Text styling icons */}
-                  <div className="flex items-center gap-3">
-                    {/* Font Family Icon */}
-                    <button className="w-10 h-10 flex items-center justify-center text-white/80 hover:text-white transition-colors">
-                      <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16m-7 6h7" />
-                      </svg>
-                    </button>
+        {/* Top Right - Download Button */}
+        {baseImage && (
+          <button
+            onClick={handleExport}
+            className="absolute top-4 right-4 w-12 h-12 flex items-center justify-center bg-white/10 backdrop-blur-md hover:bg-white/20 border border-white/20 rounded-full transition-all shadow-lg z-20"
+            aria-label="Download image"
+          >
+            <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+            </svg>
+          </button>
+        )}
 
-                    {/* Color Picker Icon */}
-                    <button className="w-10 h-10 flex items-center justify-center text-white/80 hover:text-white transition-colors">
-                      <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
-                      </svg>
-                    </button>
+        {/* Right Edge Control Panel - Floating Buttons (Instagram-style) */}
+        <div 
+          className={`absolute right-0 top-0 bottom-0 flex flex-col items-center justify-center gap-4 transition-all duration-300 z-20 ${
+            isPanelCollapsed ? 'translate-x-full opacity-0' : 'translate-x-0 opacity-100'
+          }`}
+          style={{
+            paddingRight: '8px', // Small padding from edge
+          }}
+        >
+          {/* Add Text Button - Always visible (Aa icon) */}
+          <button
+            onClick={addTextObject}
+            className="w-12 h-12 flex items-center justify-center rounded-full transition-all shadow-lg"
+            style={{
+              background: 'rgba(255, 255, 255, 0.25)',
+              backdropFilter: 'blur(20px) saturate(180%)',
+              WebkitBackdropFilter: 'blur(20px) saturate(180%)',
+              border: '1px solid rgba(255, 255, 255, 0.3)',
+            }}
+            aria-label="Add text"
+          >
+            <span className="text-white text-lg font-bold" style={{ fontFamily: 'system-ui, -apple-system, sans-serif' }}>
+              Aa
+            </span>
+          </button>
 
-                    {/* Alignment Icon */}
-                    <button className="w-10 h-10 flex items-center justify-center text-white/80 hover:text-white transition-colors">
-                      <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h8m-8 6h16" />
-                      </svg>
-                    </button>
-                  </div>
+          {/* Text Controls - Only show when text is selected */}
+          {activeObjectId && (
+            <>
+              {/* Font Family Button */}
+              <button 
+                className="w-12 h-12 flex items-center justify-center rounded-full transition-all shadow-lg"
+                style={{
+                  background: 'rgba(255, 255, 255, 0.25)',
+                  backdropFilter: 'blur(20px) saturate(180%)',
+                  WebkitBackdropFilter: 'blur(20px) saturate(180%)',
+                  border: '1px solid rgba(255, 255, 255, 0.3)',
+                }}
+                aria-label="Font family"
+              >
+                <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16m-7 6h7" />
+                </svg>
+              </button>
 
-                  {/* Right: Delete button */}
-                  <button
-                    onClick={() => deleteObject(activeObjectId)}
-                    className="w-10 h-10 flex items-center justify-center text-red-500 hover:text-red-400 transition-colors"
-                  >
-                    <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                    </svg>
-                  </button>
-                </div>
-              )}
+              {/* Color Picker Button */}
+              <button 
+                className="w-12 h-12 flex items-center justify-center rounded-full transition-all shadow-lg"
+                style={{
+                  background: 'rgba(255, 255, 255, 0.25)',
+                  backdropFilter: 'blur(20px) saturate(180%)',
+                  WebkitBackdropFilter: 'blur(20px) saturate(180%)',
+                  border: '1px solid rgba(255, 255, 255, 0.3)',
+                }}
+                aria-label="Color picker"
+              >
+                <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
+                </svg>
+              </button>
 
-              {/* Font Size Slider */}
-              {activeObjectId && (
-                <div className="px-4 py-4 flex items-center gap-3 border-b border-white/10">
-                  <span className="text-white/80 text-sm font-medium">Tt</span>
-                  <input
-                    type="range"
-                    min="8"
-                    max="200"
-                    value={objects.find(obj => obj.id === activeObjectId)?.fontSize || 48}
-                    onChange={(e) => updateObject(activeObjectId, { fontSize: parseInt(e.target.value) })}
-                    className="flex-1 h-2 bg-white/20 rounded-lg appearance-none cursor-pointer accent-accent"
-                    style={{
-                      background: `linear-gradient(to right, #3b9eff 0%, #3b9eff ${((objects.find(obj => obj.id === activeObjectId)?.fontSize || 48) - 8) / 192 * 100}%, rgba(255,255,255,0.2) ${((objects.find(obj => obj.id === activeObjectId)?.fontSize || 48) - 8) / 192 * 100}%, rgba(255,255,255,0.2) 100%)`
-                    }}
-                  />
-                  <span className="text-white/80 text-sm font-medium min-w-[3rem] text-right">
-                    {objects.find(obj => obj.id === activeObjectId)?.fontSize || 48}pt
-                  </span>
-                </div>
-              )}
-
-              {/* Bottom Action Buttons */}
-              <div className="px-4 py-4 flex items-center justify-between">
-                {/* Add Text Button */}
-                <button
-                  onClick={addTextObject}
-                  className="w-12 h-12 flex items-center justify-center bg-dark-card hover:bg-dark-card/80 rounded-lg transition-colors"
-                >
-                  <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                  </svg>
-                </button>
-
-                {/* Download Button */}
-                <button
-                  onClick={handleExport}
-                  className="w-12 h-12 flex items-center justify-center bg-accent hover:bg-accent-hover rounded-lg transition-colors shadow-lg"
-                >
-                  <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                  </svg>
-                </button>
+              {/* Font Size Display (read-only, shows current size) */}
+              <div 
+                className="w-12 h-12 flex items-center justify-center rounded-full shadow-lg"
+                style={{
+                  background: 'rgba(255, 255, 255, 0.15)',
+                  backdropFilter: 'blur(20px) saturate(180%)',
+                  WebkitBackdropFilter: 'blur(20px) saturate(180%)',
+                  border: '1px solid rgba(255, 255, 255, 0.3)',
+                }}
+              >
+                <span className="text-white/90 text-xs font-semibold">
+                  {objects.find(obj => obj.id === activeObjectId)?.fontSize || 48}
+                </span>
               </div>
-            </div>
-          </>
-        ) : (
-          /* Upload Screen */
-          <div className="flex-1 flex flex-col items-center justify-center px-6 py-12">
-            {/* Icon */}
-            <div className="w-32 h-32 bg-dark-panel rounded-3xl flex items-center justify-center mb-8">
-              <svg className="w-16 h-16 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-              </svg>
-            </div>
+            </>
+          )}
+        </div>
 
-            {/* Text */}
-            <h2 className="text-white text-xl font-semibold mb-2">Upload an Image</h2>
-            <p className="text-white/60 text-sm text-center mb-8">
-              Tap to choose a photo from your device
-            </p>
-
-            {/* Button */}
-            <button
-              onClick={handleUploadClick}
-              className="w-full max-w-sm bg-accent hover:bg-accent-hover text-white font-medium py-4 rounded-full transition-colors shadow-lg"
+        {/* Handwritten "Select Image" with Arrow - Only show when no image */}
+        {!baseImage && (
+          <div 
+            className="absolute bottom-24 left-1/2 flex flex-col items-center z-20 bounce-subtle"
+            style={{
+              transform: 'translateX(-50%)',
+            }}
+          >
+            {/* Handwritten Text */}
+            <div 
+              className="text-white text-3xl font-bold mb-3"
+              style={{
+                fontFamily: "'Caveat', cursive",
+                transform: 'rotate(-3deg)',
+                textShadow: '0 2px 12px rgba(0, 0, 0, 0.6), 0 0 20px rgba(59, 158, 255, 0.3)',
+                letterSpacing: '0.5px',
+              }}
             >
-              Choose Photo
-            </button>
+              Select Image
+            </div>
+            
+            {/* Hand-drawn Arrow pointing down (wavy/imperfect) */}
+            <svg 
+              width="50" 
+              height="35" 
+              viewBox="0 0 50 35" 
+              className="text-white"
+              style={{
+                filter: 'drop-shadow(0 2px 6px rgba(0, 0, 0, 0.5))',
+              }}
+            >
+              {/* Arrow line (wavy to look hand-drawn) */}
+              <path
+                d="M 25 2 Q 27 10 25 14 Q 23 18 25 22 Q 27 26 25 30 Q 23 32 25 33"
+                stroke="currentColor"
+                strokeWidth="3"
+                fill="none"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+              {/* Arrow head (asymmetric, hand-drawn style) */}
+              <path
+                d="M 25 33 L 18 27 M 25 33 L 28 28"
+                stroke="currentColor"
+                strokeWidth="3"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
           </div>
         )}
+
+        {/* Bottom Center - Add Image Button */}
+        <button
+          onClick={handleUploadClick}
+          className="absolute bottom-6 left-1/2 transform -translate-x-1/2 w-14 h-14 flex items-center justify-center bg-white/10 backdrop-blur-md hover:bg-white/20 border border-white/20 rounded-full transition-all shadow-lg z-20"
+          style={{
+            opacity: baseImage ? 0.7 : 1, // Adjust opacity when image is loaded
+          }}
+          aria-label={baseImage ? "Change image" : "Upload image"}
+        >
+          <svg className="w-7 h-7 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+          </svg>
+        </button>
       </div>
     </div>
   );

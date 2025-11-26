@@ -76,6 +76,32 @@ export const EditorCanvasContainer: React.FC = () => {
       setActiveObject(null);
     });
 
+    // Text area border rendering
+    const drawTextAreaBorder = () => {
+      const ctx = canvas.getContext();
+      if (!ctx) return;
+
+      const width = canvas.getWidth();
+      const height = canvas.getHeight();
+      const TEXT_BOX_PADDING = 20; // 20px padding on each side
+
+      ctx.save();
+      // Draw a dashed rectangle showing the available text area
+      ctx.strokeStyle = 'rgba(0, 200, 255, 0.5)'; // Cyan color, semi-transparent
+      ctx.lineWidth = 2;
+      ctx.setLineDash([8, 4]);
+      
+      // Draw rectangle for text area (with padding on left and right)
+      ctx.strokeRect(
+        TEXT_BOX_PADDING, // x position (left padding)
+        0, // y position (top)
+        width - (TEXT_BOX_PADDING * 2), // width (full width minus padding on both sides)
+        height // height (full height)
+      );
+      
+      ctx.restore();
+    };
+
     // Grid overlay rendering
     const drawGrid = () => {
       // Use ref to get current value (not closure value)
@@ -215,8 +241,9 @@ export const EditorCanvasContainer: React.FC = () => {
       ctx.restore();
     };
 
-    // Draw grid after canvas renders
+    // Draw text area border and grid after canvas renders
     canvas.on('after:render', () => {
+      drawTextAreaBorder();
       drawGrid();
     });
 
@@ -230,6 +257,9 @@ export const EditorCanvasContainer: React.FC = () => {
     canvas.on('object:moving', (e) => {
       const obj = e.target;
       if (!obj) return;
+
+      // For text objects, allow free movement (horizontal and vertical)
+      // Alignment will be handled when alignment buttons are clicked
 
       // Don't show delete zone during gestures (pinch/rotate) or trackpad gestures
       if (touchState.current.isGesturing || gestureState.current.mode) {
@@ -268,12 +298,18 @@ export const EditorCanvasContainer: React.FC = () => {
         draggedObject = null;
       } else {
         // Normal update - save position
+        // For text objects, allow free movement
+        const TEXT_BOX_PADDING = 20;
+        const contentAreaWidth = canvasWidth - (TEXT_BOX_PADDING * 2);
+        
+        // Update store with position
         updateObject(objId, {
           x: obj.left || 0,
           y: obj.top || 0,
           scaleX: obj.scaleX || 1,
           scaleY: obj.scaleY || 1,
           rotation: obj.angle || 0,
+          textBoxWidth: contentAreaWidth, // Full content area width
         });
         setDeleteZoneActive(false);
         draggedObject = null;
@@ -538,9 +574,61 @@ export const EditorCanvasContainer: React.FC = () => {
           if (existingObj.text !== storeObj.content) existingObj.set('text', storeObj.content);
         }
 
+        // Text box should size to content, but wrap at padding edge
+        const TEXT_BOX_PADDING = 20; // 20px padding on each side
+        const maxWidth = canvasWidth - (TEXT_BOX_PADDING * 2); // Max width for wrapping at padding edge
+        
+        // Calculate actual text width (content width)
+        const ctx = canvas.getContext();
+        if (ctx) {
+          ctx.save();
+          ctx.font = `${existingObj.fontWeight || 'normal'} ${existingObj.fontSize}px ${existingObj.fontFamily}`;
+          
+          // Measure text to get actual content width
+          const textLines = existingObj.text?.split('\n') || [existingObj.text || ''];
+          let actualTextWidth = 0;
+          textLines.forEach(line => {
+            const metrics = ctx.measureText(line);
+            actualTextWidth = Math.max(actualTextWidth, metrics.width);
+          });
+          
+          ctx.restore();
+          
+          // Set width to actual content width, but cap at max width for wrapping
+          const textBoxWidth = Math.min(actualTextWidth, maxWidth);
+          
+          if (Math.abs((existingObj.width || 0) - textBoxWidth) > 1) {
+            existingObj.set('width', textBoxWidth);
+          }
+        } else {
+          // Fallback: use max width if we can't measure
+          if (!existingObj.width || existingObj.width !== maxWidth) {
+            existingObj.set('width', maxWidth);
+          }
+        }
+        
+        // Enable wrapping so text wraps when it reaches the padding edge
+        existingObj.set('splitByGrapheme', true);
+
+        // Update alignment (text alignment within the box)
+        const currentAlign = storeObj.textAlign || 'left';
+        if (existingObj.textAlign !== currentAlign) {
+          existingObj.set('textAlign', currentAlign);
+          // Force immediate render for instant visual feedback
+          canvas.requestRenderAll();
+        }
+        
+        // Update horizontal position (allow free movement, but sync with store)
+        if (Math.abs((existingObj.left || 0) - storeObj.x) > 0.5) {
+          existingObj.set('left', storeObj.x);
+        }
+        
+        // Update vertical position
+        if (existingObj.top !== storeObj.y) {
+          existingObj.set('top', storeObj.y);
+        }
+
         // Update other properties if changed
-        if (existingObj.left !== storeObj.x) existingObj.set('left', storeObj.x);
-        if (existingObj.top !== storeObj.y) existingObj.set('top', storeObj.y);
         if (existingObj.scaleX !== storeObj.scaleX) existingObj.set('scaleX', storeObj.scaleX);
         if (existingObj.scaleY !== storeObj.scaleY) existingObj.set('scaleY', storeObj.scaleY);
         if (existingObj.angle !== storeObj.rotation) existingObj.set('angle', storeObj.rotation);
@@ -550,31 +638,86 @@ export const EditorCanvasContainer: React.FC = () => {
         if (existingObj.fontSize !== storeObj.fontSize) existingObj.set('fontSize', storeObj.fontSize);
         if (existingObj.fill !== storeObj.fill) existingObj.set('fill', storeObj.fill);
         if (existingObj.fontWeight !== storeObj.fontWeight) existingObj.set('fontWeight', storeObj.fontWeight);
-        if (existingObj.textAlign !== storeObj.textAlign) existingObj.set('textAlign', storeObj.textAlign);
 
         existingObj.setCoords();
       } else {
         // Create new object
         if (storeObj.type === 'text') {
+          // Text box should size to content, but wrap at padding edge
+          const TEXT_BOX_PADDING = 20; // 20px padding on each side
+          const maxWidth = canvasWidth - (TEXT_BOX_PADDING * 2); // Max width for wrapping at padding edge
+          
+          // Allow free positioning, but constrain to canvas bounds
+          const minX = 0;
+          const constrainedX = Math.max(minX, Math.min(storeObj.x, canvasWidth));
+          
+          // Calculate initial text width (or use max width if text is long)
+          const ctx = canvas.getContext();
+          let initialWidth = maxWidth;
+          if (ctx && storeObj.content) {
+            ctx.save();
+            ctx.font = `${storeObj.fontWeight || 'normal'} ${storeObj.fontSize}px ${storeObj.fontFamily}`;
+            const textLines = storeObj.content.split('\n');
+            let actualTextWidth = 0;
+            textLines.forEach(line => {
+              const metrics = ctx.measureText(line);
+              actualTextWidth = Math.max(actualTextWidth, metrics.width);
+            });
+            ctx.restore();
+            initialWidth = Math.min(actualTextWidth, maxWidth);
+          }
+          
           const text = new IText(storeObj.content || '', {
-            left: storeObj.x,
+            left: constrainedX,
             top: storeObj.y,
+            width: initialWidth, // Start with content width (capped at max width)
             fontFamily: storeObj.fontFamily,
             fontSize: storeObj.fontSize,
             fill: storeObj.fill,
             fontWeight: storeObj.fontWeight,
-            textAlign: storeObj.textAlign,
+            textAlign: storeObj.textAlign || 'left',
             scaleX: storeObj.scaleX,
             scaleY: storeObj.scaleY,
             angle: storeObj.rotation,
+            splitByGrapheme: true, // Enable wrapping so text wraps at padding edge
+            originX: 'left', // Always use left origin for consistent positioning
           });
+          
+          // Update store with constrained position if it was adjusted
+          if (constrainedX !== storeObj.x) {
+            updateObject(storeObj.id, { x: constrainedX });
+          }
 
           // Store reference to object ID
           (text as any).objectId = storeObj.id;
 
-          // Handle text editing
+          // Handle text editing and dynamic width updates
           text.on('changed', () => {
             updateObject(storeObj.id, { content: text.text });
+            
+            // Update text box width to match content (but cap at max width)
+            const TEXT_BOX_PADDING = 20;
+            const maxWidth = canvasWidth - (TEXT_BOX_PADDING * 2);
+            const ctx = canvas.getContext();
+            if (ctx) {
+              ctx.save();
+              ctx.font = `${text.fontWeight || 'normal'} ${text.fontSize}px ${text.fontFamily}`;
+              
+              const textLines = text.text?.split('\n') || [text.text || ''];
+              let actualTextWidth = 0;
+              textLines.forEach(line => {
+                const metrics = ctx.measureText(line);
+                actualTextWidth = Math.max(actualTextWidth, metrics.width);
+              });
+              
+              ctx.restore();
+              
+              const textBoxWidth = Math.min(actualTextWidth, maxWidth);
+              if (Math.abs((text.width || 0) - textBoxWidth) > 1) {
+                text.set('width', textBoxWidth);
+                canvas.requestRenderAll();
+              }
+            }
           });
 
           // Auto-select all text on edit (Mobile UX)
@@ -583,19 +726,6 @@ export const EditorCanvasContainer: React.FC = () => {
           });
 
           canvas.add(text);
-          
-          // Center the text horizontally after it's created
-          // Calculate centered position: centerX - (textWidth / 2)
-          canvas.renderAll(); // Render first to get accurate measurements
-          const textWidth = text.getScaledWidth();
-          const centeredX = (canvasWidth / 2) - (textWidth / 2);
-          
-          // Update text position to be centered
-          text.set('left', centeredX);
-          text.setCoords();
-          
-          // Update store with centered position
-          updateObject(storeObj.id, { x: centeredX });
           
           // Mark as newly created and auto-enter editing mode (opens keyboard immediately)
           newlyCreatedTextIdRef.current = storeObj.id;

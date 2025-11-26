@@ -496,6 +496,9 @@ function App() {
     }
   };
 
+  // Alignment handler moved to TextAlignmentControls component
+  // (Component is created but not currently used in UI - can be re-added later)
+
   return (
     <div 
       className="md:p-8 md:flex md:items-start md:justify-center bg-dark-bg overflow-hidden"
@@ -516,7 +519,7 @@ function App() {
           className="hidden"
         />
 
-        {/* Canvas Area - Full Screen */}
+            {/* Canvas Area - Full Screen */}
         <div 
           className="flex-1 relative overflow-hidden min-h-0"
           onTouchStart={handleTouchStart}
@@ -524,7 +527,7 @@ function App() {
           onTouchEnd={handleTouchEnd}
         >
           {baseImage && <EditorCanvasContainer />}
-        </div>
+            </div>
 
         {/* Bottom Right - Download Button */}
         {baseImage && (
@@ -585,8 +588,8 @@ function App() {
             <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               {/* Grid icon - 3x3 grid */}
               <path strokeLinecap="round" strokeLinejoin="round" d="M3 8h18M3 12h18M3 16h18M8 3v18M12 3v18M16 3v18" />
-            </svg>
-          </button>
+                      </svg>
+                    </button>
 
           {/* Text Controls - Only show when text is selected */}
           {activeObjectId && (
@@ -621,13 +624,16 @@ function App() {
                 aria-label="Color picker"
               >
                 <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
-                </svg>
-              </button>
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
+                      </svg>
+                    </button>
+
+              {/* Text Alignment Controls - Moved to TextAlignmentControls component (not currently used) */}
+              {/* To re-enable: import TextAlignmentControls and add: <TextAlignmentControls activeObjectId={activeObjectId} activeObject={activeObject} canvasWidth={canvasWidth} /> */}
 
             </>
           )}
-          </div>
+            </div>
         )}
 
         {/* Handwritten "Select Image" with Arrow - Only show when no image */}
@@ -650,7 +656,7 @@ function App() {
             >
               Select Image
             </div>
-            
+
             {/* Hand-drawn Arrow pointing down (wavy/imperfect) */}
             <svg 
               width="50" 

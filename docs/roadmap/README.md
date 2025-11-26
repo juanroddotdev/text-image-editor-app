@@ -41,6 +41,7 @@ This roadmap is organized into focused documents for easier navigation:
 ### 📋 **Planned Features**
 - **[High Priority](./planned/high-priority.md)** - Next up items (🔴 Critical & 🟠 High)
 - **[Medium Priority](./planned/medium-priority.md)** - Future enhancements (🟡 Medium)
+- **[Improvements & Enhancements](./planned/improvements.md)** - Refinements to existing features (🟡 Medium)
 - **[Future Considerations](./planned/future.md)** - Backlog & ideas (🔵 Low)
 
 ### 📚 **Reference**

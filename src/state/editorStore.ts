@@ -81,16 +81,24 @@ export const useEditorStore = create<EditorState>((set, get) => ({
     const defaultData = getDefaultTextBoxData();
     const { canvasWidth, canvasHeight } = get();
 
+    // Text box padding from screen edges (20px on each side = 40px total)
+    const TEXT_BOX_PADDING = 20;
+    const textBoxWidth = canvasWidth - (TEXT_BOX_PADDING * 2);
+    
+    // Calculate x position: start at padding, then center will be handled by textAlign
+    const textBoxX = TEXT_BOX_PADDING;
+
     const newObject: CanvasObject = {
       id: generateObjectId(),
       type: 'text',
-      x: canvasWidth / 2, // Horizontally centered
+      x: textBoxX, // Start at padding (alignment will handle centering/right)
       y: canvasHeight * 0.35, // 65% from bottom (35% from top)
-      width: 200,
-      height: 50,
+      width: 200, // Legacy property (not used for IText width)
+      height: 50, // Legacy property (not used for IText height)
       rotation: 0,
       scaleX: 1,
       scaleY: 1,
+      textBoxWidth: textBoxWidth, // Fixed width for text box
       ...defaultData,
     };
 

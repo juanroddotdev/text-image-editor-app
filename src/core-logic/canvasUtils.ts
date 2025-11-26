@@ -20,6 +20,7 @@ export interface CanvasObject {
   fill?: string;
   fontWeight?: string;
   textAlign?: string;
+  textBoxWidth?: number; // Fixed width for text box (enables wrapping and alignment)
   // Image-specific properties
   src?: string;
 }

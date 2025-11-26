@@ -55,6 +55,10 @@
 8. **Safe Area Management** - Adjust UI for notches and home indicator bars
 9. **Background Image Manipulation** - Add ability to move, scale, rotate the background image
 
+### Future Improvements (See [Improvements & Enhancements](../planned/improvements.md))
+- **Text Box: Center on Screen While Typing** - Auto-center text box when editing, return to position when done
+- **Text Wrapping Improvements** - Better word boundaries, hyphenation, line spacing, paragraph spacing
+
 ### Medium Priority Items (Ready Soon)
 - Add accessibility features (ARIA labels, keyboard navigation)
 - Improve TypeScript types (remove `any` types)

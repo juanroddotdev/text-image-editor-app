@@ -153,8 +153,8 @@ These are high-priority features that should be implemented next. They represent
 
 ### 4. Complete UI Controls
 - **Priority**: 🔴 Critical
-- **Status**: 🟡 **PARTIALLY COMPLETE** (Font & Color pickers done, Alignment pending)
-- **Current State**: Font and Color pickers implemented, Alignment still missing
+- **Status**: 🟡 **PARTIALLY COMPLETE** (Font & Color pickers done, Alignment & Background pending)
+- **Current State**: Font and Color pickers implemented, Alignment and Text Background still missing
 
 **Completed**: 
 - ✅ Font Family picker - Mobile-friendly modal with preview (Completed: 2025-11-23)
@@ -165,6 +165,11 @@ These are high-priority features that should be implemented next. They represent
   - Add alignment buttons (Left, Center, Right)
   - Update active object's `textAlign` property
   - Or remove icon if alignment not needed
+- ❌ Text Background - Still needs implementation
+  - Add background color/fill for text boxes
+  - Improves legibility when text is over images
+  - Should work with existing color picker or have separate background color picker
+  - Update active object's background property
 
 **Files to Modify**: 
 - `src/App.tsx` (connect icons to components)
@@ -172,6 +177,66 @@ These are high-priority features that should be implemented next. They represent
 - `src/components/presentational/ColorPicker.tsx` (create or update)
 
 **Reference**: See existing components in `src/components/presentational/`
+
+---
+
+### 4a. Text Background (Background Fill for Text Boxes)
+- **Priority**: 🔴 Critical (Part of Complete UI Controls)
+- **Status**: ❌ Not Implemented
+- **Current State**: No background fill option for text boxes
+
+**Description**: 
+Add ability to set a background color/fill for text boxes to improve legibility when text is placed over images. This is essential for ensuring text remains readable regardless of the background image.
+
+**Expected Behavior**:
+- Text boxes can have a background color/fill
+- Background improves text legibility over images
+- Background color can be customized (similar to text color)
+- Background should be visible behind text content
+
+**Implementation**:
+- **Task 1**: Add background color property to text objects
+  - Add `backgroundColor` or `textBackgroundColor` property to `CanvasObject` interface
+  - Store background color in editor store
+  - Update Fabric.js IText object with background fill
+- **Task 2**: Add background color picker UI
+  - Add "Text Background" button to right-edge control panel (when text is selected)
+  - Can reuse existing ColorPickerModal or create separate background color picker
+  - Show current background color in button (if set)
+- **Task 3**: Implement Fabric.js background rendering
+  - Use Fabric.js `textBackgroundColor` property or custom rendering
+  - Ensure background renders behind text but above canvas background
+  - Handle transparency/opacity if needed
+- **Task 4**: Update object sync logic
+  - Sync background color from store to Fabric.js object
+  - Update store when background color changes
+  - Ensure background persists when object is moved/scaled
+
+**Technical Considerations**:
+- Fabric.js IText supports `textBackgroundColor` property
+- May need to handle padding around text for better visual appearance
+- Consider adding opacity/transparency control for background
+- Background should work with existing text color and font styling
+- Test with various text sizes and lengths
+
+**Files to Create**: 
+- None (can reuse existing ColorPickerModal)
+
+**Files to Modify**: 
+- `src/core-logic/canvasUtils.ts` (add backgroundColor to CanvasObject interface)
+- `src/state/editorStore.ts` (add backgroundColor to object state)
+- `src/components/containers/EditorCanvasContainer.tsx` (sync backgroundColor to Fabric.js, handle updates)
+- `src/App.tsx` (add Text Background button, integrate with ColorPickerModal)
+
+**User Experience**:
+- Background color picker should be easily accessible when text is selected
+- Visual feedback showing current background color
+- Background should improve text readability over complex images
+- Option to remove/clear background color (transparent)
+
+**Reference**: Similar to text background in design tools like Canva, Figma, and Adobe Express
+
+**Future Improvements**: See [Improvements & Enhancements](./improvements.md) for text box UX enhancements (center on screen while typing, text wrapping improvements)
 
 ---
 
@@ -443,7 +508,7 @@ These are high-priority features that should be implemented next. They represent
 3. **Font Scaling Display** - Next
 
 ### ⏸️ DEFERRED (After Mobile UX Checklist Complete)
-4. **Complete UI Controls** - Font & Color done, Alignment pending
+4. **Complete UI Controls** - Font & Color done, Alignment & Text Background pending
 5. **Add Testing Infrastructure** - Critical for code quality
 6. **Replace Alert() with Toast System** - Essential UX improvement
 7. **Remove Console.log Statements** - Quick cleanup
